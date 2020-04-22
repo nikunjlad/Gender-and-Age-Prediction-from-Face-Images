@@ -71,7 +71,7 @@ class Main(DataGen):
         history = list()
         train_start = time.time()  # start_time of training
         best_val_loss = float('inf')  # initially loss in infinite
-        model_name = "model__" + str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "-" + \
+        model_name = self.args.age_gender + "_model_" + str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "_" + \
                      str(len(self.config["GPU"]["DEVICES"])) + ".pt"
 
         # for all the epochs
@@ -279,7 +279,7 @@ class Main(DataGen):
         stats["training_history"] = history
         stats["test_history"] = test_hist
 
-        stats_name = "stats__" + str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "-" + \
+        stats_name = self.args.age_gender + "_stats_" + str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "_" + \
                      str(len(self.config["GPU"]["DEVICES"])) + ".json"
         with open(output_path + "/" + stats_name, 'w') as outfile:
             json.dump(stats, outfile, indent=2)
@@ -396,8 +396,8 @@ class Main(DataGen):
         hist = np.array(history)  # convert history from list to numpy array
 
         # 14. plot training-validation accuracy and loss curves
-        loss_name = output_path + "/train_valid_loss_" + str(len(self.config["GPU"]["DEVICES"])) + ".png"
-        acc_name = output_path + "/train_valid_accuracy_" + str(len(self.config["GPU"]["DEVICES"])) + ".png"
+        loss_name = output_path + "/" + self.args.age_gender + "_train_valid_loss_" + str(len(self.config["GPU"]["DEVICES"])) + ".png"
+        acc_name = output_path + "/" + self.args.age_gender + "_train_valid_accuracy_" + str(len(self.config["GPU"]["DEVICES"])) + ".png"
 
         self.plot_graphs(hist, epochs, x_label="Epochs", y_label="Cross-Entropy Loss", plt_title="Loss Curves",
                          legend=['train_loss', 'valid_loss'], save_name=loss_name)
