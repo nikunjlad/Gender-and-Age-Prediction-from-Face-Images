@@ -62,6 +62,6 @@ class AgeNet(nn.Module):
         x = self.dropout(x)
         x = F.relu(self.fc2(x))
         x = self.dropout(x)
-        x = F.log_softmax(self.fc3(x), dim=1)
+        x = F.relu(self.fc3(x))
         print(x.shape)
         return x
