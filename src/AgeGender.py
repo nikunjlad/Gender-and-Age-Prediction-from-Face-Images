@@ -25,7 +25,9 @@ def getFaceBox(net, frame, conf_threshold=0.7):
             y1 = int(detections[0, 0, i, 4] * frameHeight)  # top left y co-ordinate
             x2 = int(detections[0, 0, i, 5] * frameWidth)   # bottom right x co-ordinate
             y2 = int(detections[0, 0, i, 6] * frameHeight)  # bottom right y co-ordinate
-            bboxes.append([x1, y1, x2, y2])
+            bboxes.append([x1, y1, x2, y2])  # append the co-ordinates list computed above in the bounding box list
+
+            # draw a rectangle around the face and return the original image along with bounding box co-ordinates
             cv2.rectangle(frameOpencvDnn, (x1, y1), (x2, y2), (0, 255, 0), int(round(frameHeight / 150)), 8)
 
     return frameOpencvDnn, bboxes
@@ -78,9 +80,12 @@ while cv2.waitKey(1) < 0:
 
     # pass the input frame along with face net model for getting bounding box information
     frameFace, bboxes = getFaceBox(faceNet, frame)
-    break
+
+    # if the bounding box list is empty, just display empty frames
     if not bboxes:
         print("No face Detected, Checking next frame")
+        cv2.putText(frameFace, "No face detected!", (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2,
+                    cv2.LINE_AA)
         cv2.imshow("Age Gender Demo", frameFace)
 
     for bbox in bboxes:
