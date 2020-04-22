@@ -59,12 +59,12 @@ class Main(DataGen):
     # checking if cuda is available
     def configure_cuda(self, device_id):
         self.train_on_gpu = torch.cuda.is_available()
-        if not self.train_on_gpu and self.config["HYPERPARAMETERS"]["GPU"]:
+        if not self.train_on_gpu and self.config["GPU"]["STATUS"]:
             self.logger.info('Training on CPU ...')
         else:
             torch.cuda.set_device(device_id)
             self.logger.info('CUDA is available! Training on {} NVidia {} GPUs'.format(
-                str(len(self.config["HYPERPARAMETERS"]["DEVICES"])), str(torch.cuda.get_device_name(0))))
+                str(len(self.config["GPU"]["DEVICES"])), str(torch.cuda.get_device_name(0))))
 
     def train(self, net, epochs, optimizer, criterion, scheduler, stats, args, output_path):
 
