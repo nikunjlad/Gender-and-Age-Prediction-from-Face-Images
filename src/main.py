@@ -385,8 +385,7 @@ class Main(DataGen):
         # 12. optimizers and loss functions and scheduler for auto adjusting learning rate based on performance
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(), lr=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["LR"],
-                              momentum=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["MOMENTUM"],
-                              weight_decay=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["WT_DECAY"])
+                              momentum=0.9, weight_decay=5e-4)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, num_train_data_batches, eta_min=0)
 
         # 13. training our model
