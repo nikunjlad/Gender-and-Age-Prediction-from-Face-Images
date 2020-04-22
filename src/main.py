@@ -355,7 +355,7 @@ class Main(DataGen):
                                                                     str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
 
         # 8. export a grid of images or exploring our data visually
-        batch = next(iter(self.data["test_dataloader"]))
+        batch = next(iter(self.data[args.age_gender]["train_dataloader"]))
         images, labels = batch
 
         if self.config["HYPERPARAMETERS"]["PLOT_IMG"]:
