@@ -265,7 +265,7 @@ class Main(DataGen):
                 info["total_memory (MB)"] = torch.cuda.get_device_properties(info["id"]).total_memory * (2 ** -20)
                 stats["device"]["devices"].append(info)
         stats["hyperparameters"]["epochs"] = self.config["HYPERPARAMETERS"]["EPOCHS"]
-        stats["hyperparameters"]["learning_rate"] = self.config["HYPERPARAMETERS"]["OPTIMZER"]["LR"]
+        stats["hyperparameters"]["learning_rate"] = self.config["HYPERPARAMETERS"]["OPTIMIZER"]["LR"]
         stats["hyperparameters"]["batch_size"] = self.config["HYPERPARAMETERS"]["BATCH_SIZE"]
         stats["hyperparameters"]["optimizer"] = self.config["HYPERPARAMETERS"]["OPTIMIZER"]["NAME"]
         stats["metrics"] = dict()
