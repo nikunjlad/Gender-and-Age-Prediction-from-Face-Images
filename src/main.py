@@ -2,6 +2,7 @@ import torch, warnings, torchvision, os, json, time, yaml, datetime, logging, ar
 from utils.DataGen import DataGen
 from model import AgeNet, GenderNet
 import numpy as np
+from tqdm import tqdm
 import torch.optim as optim
 import torch.nn as nn
 from torchvision.utils import save_image
@@ -126,7 +127,7 @@ class Main(DataGen):
                 net.eval()
 
                 # Validation loop
-                for j, (inputs, labels) in enumerate(self.data[args.age_gender]["valid_dataloader"]):
+                for j, (inputs, labels) in enumerate(tqdm(self.data[args.age_gender]["valid_dataloader"])):
 
                     if self.train_on_gpu:
                         inputs = inputs.cuda()
@@ -197,7 +198,7 @@ class Main(DataGen):
             net.eval()  # Set to evaluation mode
 
             # Validation loop
-            for j, (inputs, labels) in enumerate(self.data[args.age_gender]["test_dataloader"]):
+            for j, (inputs, labels) in enumerate(tqdm(self.data[args.age_gender]["test_dataloader"])):
                 inputs = inputs.cuda()
                 labels = labels.cuda()
 
@@ -235,8 +236,12 @@ class Main(DataGen):
 
         plt.figure(figsize=(7,6))
         x = np.array([i for i in range(0, epochs)])
-        plt.plot(x, hist[:, 0])
-        plt.plot(x, hist[:, 1])
+        if y_label == "Loss":
+            plt.plot(x, hist[:, 0])
+            plt.plot(x, hist[:, 1])
+        else:
+            plt.plot(x, hist[:, 2])
+            plt.plot(x, hist[:, 3])
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.title(plt_title)
