@@ -72,6 +72,7 @@ class Process:
 
     def imread(self, path, width, height):
         img = cv2.imread(path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
         return img
 

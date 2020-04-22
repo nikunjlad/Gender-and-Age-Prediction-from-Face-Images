@@ -71,7 +71,7 @@ class Main(DataGen):
         history = list()
         train_start = time.time()  # start_time of training
         best_val_loss = float('inf')  # initially loss in infinite
-        model_name = "model__" + self.config["HYPERPARAMETERS"]["BATCH_SIZE"] + "-" + \
+        model_name = "model__" + str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "-" + \
                      str(len(self.config["GPU"]["DEVICES"])) + ".pt"
 
         # for all the epochs
@@ -279,7 +279,7 @@ class Main(DataGen):
         stats["training_history"] = history
         stats["test_history"] = test_hist
 
-        stats_name = "stats__" + self.config["HYPERPARAMETERS"]["BATCH_SIZE"] + "-" + \
+        stats_name = "stats__" + str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "-" + \
                      str(len(self.config["GPU"]["DEVICES"])) + ".json"
         with open(output_path + "/" + stats_name, 'w') as outfile:
             json.dump(stats, outfile, indent=2)
@@ -360,11 +360,10 @@ class Main(DataGen):
 
         if self.config["HYPERPARAMETERS"]["PLOT_IMG"]:
             grid = torchvision.utils.make_grid(images[:64], nrow=8)
-            self.logger.debug(type(grid))
             plt.figure(figsize=(10, 10))
             np.transpose(grid, (1, 2, 0))
             save_image(grid, 'grid.png')
-            for data, target in self.data["test_dataloader"]:
+            for data, target in self.data[args.age_gender]["train_dataloader"]:
                 self.logger.debug("Batch image tensor dimensions: {}".format(str(data.shape)))
                 self.logger.debug("Batch label tensor dimensions: {}".format(str(target.shape)))
                 break
@@ -385,15 +384,9 @@ class Main(DataGen):
 
         # 12. optimizers and loss functions and scheduler for auto adjusting learning rate based on performance
         criterion = nn.CrossEntropyLoss()
-        optimizer = self.config["HYPERPARAMETERS"]["OPTIMIZER"]["NAME"](net.parameters(),
-                                                                        lr=self.config["HYPERPARAMETERS"]["OPTIMIZER"][
-                                                                            "LR"],
-                                                                        momentum=
-                                                                        self.config["HYPERPARAMETERS"]["OPTIMIZER"][
-                                                                            "MOMENTUM"],
-                                                                        weight_decay=
-                                                                        self.config["HYPERPARAMETERS"]["OPTIMIZER"][
-                                                                            "WT_DECAY"])
+        optimizer = optim.SGD(net.parameters(), lr=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["LR"],
+                              momentum=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["MOMENTUM"],
+                              weight_decay=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["WT_DECAY"])
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, num_train_data_batches, eta_min=0)
 
         # 13. training our model
