@@ -234,14 +234,14 @@ class Main(DataGen):
     @staticmethod
     def plot_graphs(hist, epochs, x_label, y_label, plt_title, legend, save_name):
 
-        plt.figure(figsize=(7,6))
+        plt.figure(figsize=(7, 6))
         x = np.array([i for i in range(0, epochs)])
-        if y_label == "Loss":
-            plt.plot(x, hist[:, 0])
-            plt.plot(x, hist[:, 1])
-        else:
+        if y_label == "Accuracy":
             plt.plot(x, hist[:, 2])
             plt.plot(x, hist[:, 3])
+        else:
+            plt.plot(x, hist[:, 0])
+            plt.plot(x, hist[:, 1])
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.title(plt_title)
