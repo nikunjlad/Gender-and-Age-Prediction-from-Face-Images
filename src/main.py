@@ -320,12 +320,12 @@ class Main(DataGen):
 
         # 5. getting dataloader information, batch size and sample counts
         # since age and gender both are split using same validation ratio, their sizes will be same.
-        train_data_size = len(self.data["train_dataset_age"])
-        valid_data_size = len(self.data["valid_dataset_age"])
-        test_data_size = len(self.data["test_dataset_age"])
-        num_train_data_batches = len(self.data["train_dataloader_age"])
-        num_valid_data_batches = len(self.data["valid_dataloader_age"])
-        num_test_data_batches = len(self.data["test_dataloader_age"])
+        train_data_size = len(self.data["age"]["train_dataset"])
+        valid_data_size = len(self.data["age"]["valid_dataset"])
+        test_data_size = len(self.data["age"]["test_dataset"])
+        num_train_data_batches = len(self.data["age"]["train_dataloader"])
+        num_valid_data_batches = len(self.data["age"]["valid_dataloader"])
+        num_test_data_batches = len(self.data["age"]["test_dataloader"])
 
         # 6. update stats of data information
         stats["data"] = dict()
