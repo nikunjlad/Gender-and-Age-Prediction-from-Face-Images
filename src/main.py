@@ -1,4 +1,4 @@
-import torch, warnings, torchvision, os, json, time, yaml, datetime, logging, argparse
+import torch, warnings, torchvision, os, json, time, yaml, datetime, logging, argparse, sys
 from utils.DataGen import DataGen
 from model import AgeNet, GenderNet
 import numpy as np
@@ -7,7 +7,6 @@ import torch.nn as nn
 from torchvision.utils import save_image
 import torch.backends.cudnn as cudnn
 import matplotlib.pyplot as plt
-
 
 warnings.filterwarnings('ignore')
 logging.getLogger('matplotlib.font_manager').disabled = True
@@ -67,12 +66,15 @@ class Main(DataGen):
             self.logger.info('CUDA is available! Training on {} NVidia {} GPUs'.format(
                 str(len(self.config["HYPERPARAMETERS"]["DEVICES"])), str(torch.cuda.get_device_name(0))))
 
-    def train(self, net, epochs, optimizer, criterion, scheduler, stats):
+    def train(self, net, epochs, optimizer, criterion, scheduler, stats, args, output_path):
 
         history = list()
-        train_start = time.time()
-        best_val_loss = float('inf')
+        train_start = time.time()  # start_time of training
+        best_val_loss = float('inf')  # initially loss in infinite
+        model_name = "model__" + self.config["HYPERPARAMETERS"]["BATCH_SIZE"] + "-" + \
+                     str(len(self.config["GPU"]["DEVICES"])) + ".pt"
 
+        # for all the epochs
         for epoch in range(epochs):
             epoch_start = time.time()  # start time for the epoch
             print("Epoch: {}/{}".format(epoch + 1, epochs))
@@ -80,14 +82,13 @@ class Main(DataGen):
             # Set to training mode
             net.train()
 
-            # Loss and Accuracy within the epoch
+            # Loss and Accuracy within the epoch, initial values are set to be 0
             train_loss = 0.0
             train_acc = 0.0
-
             valid_loss = 0.0
             valid_acc = 0.0
 
-            for i, (inputs, labels) in enumerate(self.data["train_dataloader"]):
+            for i, (inputs, labels) in enumerate(self.data[args.age_gender]["train_dataloader"]):
 
                 scheduler.step()  # stepping through the learning rate for optimal convergence
 
@@ -96,26 +97,16 @@ class Main(DataGen):
                     inputs = inputs.cuda()
                     labels = labels.cuda()
 
-                # Clean existing gradients
-                optimizer.zero_grad()
-
-                # Forward pass - compute outputs on input data using the model
-                outputs = net(inputs)
-
-                # Compute loss
-                loss = criterion(outputs, labels)
-
-                # Backpropagate the gradients
-                loss.backward()
-
-                # Update the parameters
-                optimizer.step()
+                optimizer.zero_grad()  # Clean existing gradients
+                outputs = net(inputs)  # Forward pass - compute outputs on input data using the model
+                loss = criterion(outputs, labels)  # Compute loss
+                loss.backward()  # Backpropagate the gradients
+                optimizer.step()  # Update the parameters
 
                 # Compute the total loss for the batch and add it to train_loss
                 train_loss += loss.item() * inputs.size(0)
 
-                # Compute the accuracy
-                ret, predictions = torch.max(outputs.data, 1)
+                ret, predictions = torch.max(outputs.data, 1)  # Compute the accuracy
                 correct_counts = predictions.eq(labels.data.view_as(predictions))
 
                 # Convert correct_counts to float and then compute the mean
@@ -125,7 +116,8 @@ class Main(DataGen):
                 train_acc += acc.item() * inputs.size(0)
 
                 print("Batch: {:03d}/{:03d}, Training Loss: {:.4f}, "
-                      "Training Acc: {:.4f}".format(i, stats["data"]["training"]["num_batches"], loss.item(), acc.item() * 100))
+                      "Training Acc: {:.4f}".format(i, stats["data"]["training"]["num_batches"], loss.item(),
+                                                    acc.item() * 100))
 
             # Validation - No gradient tracking needed
             with torch.no_grad():
@@ -134,23 +126,18 @@ class Main(DataGen):
                 net.eval()
 
                 # Validation loop
-                for j, (inputs, labels) in enumerate(self.data["valid_dataloader"]):
+                for j, (inputs, labels) in enumerate(self.data[args.age_gender]["valid_dataloader"]):
 
                     if self.train_on_gpu:
                         inputs = inputs.cuda()
                         labels = labels.cuda()
 
-                    # Forward pass - compute outputs on input data using the model
-                    outputs = net(inputs)
-
-                    # Compute loss
-                    loss = criterion(outputs, labels)
+                    outputs = net(inputs)  # Forward pass - compute outputs on input data using the model
+                    loss = criterion(outputs, labels)  # Compute loss
 
                     # Compute the total loss for the batch and add it to valid_loss
                     valid_loss += loss.item() * inputs.size(0)
-
-                    # Calculate validation accuracy
-                    ret, predictions = torch.max(outputs.data, 1)
+                    ret, predictions = torch.max(outputs.data, 1)  # Calculate validation accuracy
                     correct_counts = predictions.eq(labels.data.view_as(predictions))
 
                     # Convert correct_counts to float and then compute the mean
@@ -160,10 +147,12 @@ class Main(DataGen):
                     valid_acc += acc.item() * inputs.size(0)
 
                     print("Validation Batch number: {:03d}/{:03d}, Validation Loss: {:.4f}, "
-                          "Validation Acc: {:.4f}".format(j, stats["data"]["validation"]["num_batches"], loss.item(), acc.item() * 100))
+                          "Validation Acc: {:.4f}".format(j, stats["data"]["validation"]["num_batches"], loss.item(),
+                                                          acc.item() * 100))
 
             # resetting scheduler
-            scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, stats["data"]["training"]["num_batches"], eta_min=0)
+            scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, stats["data"]["training"]["num_batches"],
+                                                             eta_min=0)
 
             # Find average training loss and training accuracy
             avg_train_loss = train_loss / stats["data"]["training"]["num_samples"]
@@ -186,12 +175,114 @@ class Main(DataGen):
             if avg_valid_loss < best_val_loss:
                 print("\nPrevious Best loss: {:.4f} | New Best Loss: {:.4f} | "
                       "Saving Best model...\n".format(best_val_loss, avg_valid_loss))
-                torch.save(net.state_dict(), output_path + "/" + self.config["DATALOADER"]["MODEL_PATH"])
+                torch.save(net.state_dict(), output_path + "/" + model_name)
                 best_val_loss = avg_valid_loss  # new best loss is the recently found validation loss
 
-        train_stop = time.time()
-        self.logger.info("Time taken for training: {}".format(str(train_stop - train_start)))
+        exec_time = time.time() - train_start
+        self.logger.info("Time taken for training: {}".format(str(exec_time)))
 
+        return net, history, exec_time, model_name
+
+    def test(self, net, criterion, output_path, model_name, stats, args):
+
+        # load model after training for testing
+        net.load_state_dict(torch.load(output_path + "/" + model_name))
+
+        test_loss = 0
+        test_acc = 0
+        test_hist = list()
+
+        # Validation - No gradient tracking needed
+        with torch.no_grad():
+            net.eval()  # Set to evaluation mode
+
+            # Validation loop
+            for j, (inputs, labels) in enumerate(self.data[args.age_gender]["test_dataloader"]):
+                inputs = inputs.cuda()
+                labels = labels.cuda()
+
+                outputs = net(inputs)  # Forward pass - compute outputs on input data using the model
+                loss = criterion(outputs, labels)  # Compute loss
+
+                # Compute the total loss for the batch and add it to valid_loss
+                test_loss += loss.item() * inputs.size(0)
+
+                # Calculate validation accuracy
+                ret, predictions = torch.max(outputs.data, 1)
+                print(predictions.cpu().numpy()[0])
+                correct_counts = predictions.eq(labels.data.view_as(predictions))
+
+                # Convert correct_counts to float and then compute the mean
+                acc = torch.mean(correct_counts.type(torch.FloatTensor))
+
+                # Compute total accuracy in the whole batch and add to valid_acc
+                test_acc += acc.item() * inputs.size(0)
+
+                print("Test Batch number: {:03d}/{:03d}, Test Loss: {:.4f}, "
+                      "Test Accuracy: {:.4f}".format(j, stats["data"]["testing"]["num_batches"], loss.item(),
+                                                     acc.item() * 100))
+
+            avg_test_loss = test_loss / stats["data"]["testing"]["num_samples"]
+            avg_test_acc = test_acc / float(stats["data"]["testing"]["num_samples"])
+
+            test_hist.append([avg_test_loss, avg_test_acc])
+            print("Test: Loss : {:.4f}, Accuracy: {:.4f}%".format(avg_test_loss, avg_test_acc * 100))
+
+        return test_hist
+
+    @staticmethod
+    def plot_graphs(hist, epochs, x_label, y_label, plt_title, fig_size, legend, save_name):
+
+        plt.figure(fig_size)
+        x = np.array([i for i in range(0, epochs)])
+        plt.plot(x, hist[:, 0])
+        plt.plot(x, hist[:, 1])
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.title(plt_title)
+        plt.legend(legend, loc='upper right')
+        plt.savefig(save_name)
+
+    def export_stats(self, stats, history, test_hist, exec_time, output_path):
+
+        stats["hyperparameters"] = dict()
+        stats["device"] = dict()
+        stats["device"]["type"] = ["gpu" if self.config["GPU"]["STATUS"] else "cpu"][0]
+        stats["device"]["parallel"] = self.config["GPU"]["PARALLEL"]
+        stats["device"]["devices"] = list()
+        if stats["device"]["type"] == "gpu":
+            if isinstance(self.config["GPU"]["DEVICES"], list):
+                for dev in self.config["GPU"]["DEVICES"]:
+                    info = dict()
+                    info["id"] = dev
+                    info["device_name"] = torch.cuda.get_device_properties(dev).name
+                    info["total_memory (MB)"] = torch.cuda.get_device_properties(dev).total_memory * (2 ** -20)
+                    stats["device"]["devices"].append(info)
+            else:
+                info = dict()
+                info["id"] = self.config["GPU"]["DEVICES"][0]
+                info["device_name"] = torch.cuda.get_device_properties(info["id"]).name
+                info["total_memory (MB)"] = torch.cuda.get_device_properties(info["id"]).total_memory * (2 ** -20)
+                stats["device"]["devices"].append(info)
+        stats["hyperparameters"]["epochs"] = self.config["HYPERPARAMETERS"]["EPOCHS"]
+        stats["hyperparameters"]["learning_rate"] = self.config["HYPERPARAMETERS"]["OPTIMZER"]["LR"]
+        stats["hyperparameters"]["batch_size"] = self.config["HYPERPARAMETERS"]["BATCH_SIZE"]
+        stats["hyperparameters"]["optimizer"] = self.config["HYPERPARAMETERS"]["OPTIMIZER"]["NAME"]
+        stats["metrics"] = dict()
+        stats["metrics"]["training_loss"] = history[-1][0]
+        stats["metrics"]["training_accuracy"] = history[-1][2]
+        stats["metrics"]["validation_loss"] = history[-1][1]
+        stats["metrics"]["validation_accuracy"] = history[-1][3]
+        stats["metrics"]["test_loss"] = test_hist[-1][0]
+        stats["metrics"]["test_accuracy"] = test_hist[-1][1]
+        stats["metrics"]["runtime (secs)"] = exec_time
+        stats["training_history"] = history
+        stats["test_history"] = test_hist
+
+        stats_name = "stats__" + self.config["HYPERPARAMETERS"]["BATCH_SIZE"] + "-" + \
+                     str(len(self.config["GPU"]["DEVICES"])) + ".json"
+        with open(output_path + "/" + stats_name, 'w') as outfile:
+            json.dump(stats, outfile, indent=2)
 
     def main(self):
         """
@@ -210,8 +301,10 @@ class Main(DataGen):
         # configure data path
         if os.getenv("HOME") != self.config["DATA"]["DATA_DIR"]:
             self.config["DATA"]["DATA_DIR"] = os.getenv("HOME")
-        stats_path = self.config["DATA"]["STATS_PATH"]
-        plot_path = self.config["DATA"]["PLOT_PATH"]
+        dir_name = self.config["HYPERPARAMETERS"]["BATCH_SIZE"] + "_" + self.config["DATA"]["OUTPUT_DIR"] + "_" + \
+                   str(len(self.config["GPU"]["DEVICES"]))
+        output_path = os.path.join(self.config["DATA"]["OUTPUT_DIR"], dir_name)
+        os.mkdir(output_path)
 
         # 3. configuring target labels, in our case we have 2 classification tasks, gender and age classification
         ages = ["(0, 2)", "(4, 6)", "(8, 12)", "(15, 20)", "(21, 24)", "(25, 32)",
@@ -276,7 +369,8 @@ class Main(DataGen):
                 break
 
         # 9. loading Network based on the task at hand
-        net = lambda x: AgeNet() if self.args.age_gender == "age" else GenderNet()
+        task = lambda x: AgeNet() if x == "age" else GenderNet()
+        net = task(self.args.age_gender)
 
         # 10. use GPU if available else cpu by default
         if self.train_on_gpu:
@@ -284,147 +378,47 @@ class Main(DataGen):
         self.logger.debug(str(net))
 
         # 11. data parallel mode if enabled by user for parallel training
-        if self.config["HYPERPARAMETERS"]["PARALLEL"]:
-            net = torch.nn.DataParallel(net, device_ids=self.config["HYPERPARAMETERS"]["DEVICES"])
+        if self.config["GPU"]["PARALLEL"]:
+            net = torch.nn.DataParallel(net, device_ids=self.config["GPU"]["DEVICES"])
             cudnn.benchmark = True
 
         # 12. optimizers and loss functions and scheduler for auto adjusting learning rate based on performance
         criterion = nn.CrossEntropyLoss()
         optimizer = self.config["HYPERPARAMETERS"]["OPTIMIZER"]["NAME"](net.parameters(),
-                                                                        lr=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["LR"],
-                                                                        momentum=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["MOMENTUM"],
-                                                                        weight_decay=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["WT_DECAY"])
+                                                                        lr=self.config["HYPERPARAMETERS"]["OPTIMIZER"][
+                                                                            "LR"],
+                                                                        momentum=
+                                                                        self.config["HYPERPARAMETERS"]["OPTIMIZER"][
+                                                                            "MOMENTUM"],
+                                                                        weight_decay=
+                                                                        self.config["HYPERPARAMETERS"]["OPTIMIZER"][
+                                                                            "WT_DECAY"])
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, num_train_data_batches, eta_min=0)
 
-        # training and validation loop
+        # 13. training our model
         epochs = self.config["HYPERPARAMETERS"]["EPOCHS"]
+        net, history, exec_time, model_name = self.train(net, self.config["HYPERPARAMETERS"]["EPOCHS"], optimizer,
+                                                         criterion, scheduler, stats, args, output_path)
 
-
-        # saving model once training is done
-        # torch.save(net.state_dict(), 'asl.pt')  # save the resnet model
         hist = np.array(history)  # convert history from list to numpy array
 
-        loss_name = output_path + "/train_valid_loss_" + str(len(self.config["HYPERPARAMETERS"]["DEVICES"])) + ".png"
-        acc_name = output_path + "/train_valid_accuracy_" + str(len(self.config["HYPERPARAMETERS"]["DEVICES"])) + ".png"
+        # 14. plot training-validation accuracy and loss curves
+        loss_name = output_path + "/train_valid_loss_" + str(len(self.config["GPU"]["DEVICES"])) + ".png"
+        acc_name = output_path + "/train_valid_accuracy_" + str(len(self.config["GPU"]["DEVICES"])) + ".png"
 
-        # training and validation loss curves
-        plt.figure(figsize=(7, 6))
-        x = np.array([i for i in range(0, epochs)])
-        plt.plot(x, hist[:, 0])
-        plt.plot(x, hist[:, 1])
-        plt.xlabel("Epochs")
-        plt.ylabel("Cross-Entropy Loss")
-        plt.title("Loss Curves")
-        plt.legend(['train_loss', 'valid_loss'], loc='upper right')
-        plt.savefig(loss_name)
+        self.plot_graphs(hist, epochs, x_label="Epochs", y_label="Cross-Entropy Loss", plt_title="Loss Curves",
+                         fig_size=(7, 6), legend=['train_loss', 'valid_loss'], save_name=loss_name)
+        self.plot_graphs(hist, epochs, x_label="Epochs", y_label="Accuracy", plt_title="Accuracy Curves",
+                         fig_size=(7, 6), legend=['train_acc', 'valid_acc'], save_name=acc_name)
 
-        # training and validation accuracy curves
-        plt.figure(figsize=(7, 6))
-        x = np.array([i for i in range(0, epochs)])
-        plt.plot(x, hist[:, 2])
-        plt.plot(x, hist[:, 3])
-        plt.xlabel("Epochs")
-        plt.ylabel("Accuracy")
-        plt.title("Accuracy Curves")
-        plt.legend(['train_acc', 'valid_acc'], loc='upper right')
-        plt.savefig(acc_name)
+        # 15. testing
+        test_hist = self.test(net, criterion, output_path, model_name, stats, args)
 
-        # load model after training for testing
-        net.load_state_dict(torch.load(output_path + "/" + self.config["DATALOADER"]["MODEL_PATH"]))
+        # 16. exporting statistics
+        self.export_stats(stats, history, test_hist, exec_time, output_path)
 
-        test_loss = 0
-        test_acc = 0
-        test_hist = list()
-
-        # Validation - No gradient tracking needed
-        with torch.no_grad():
-
-            # Set to evaluation mode
-            net.eval()
-
-            # Validation loop
-            for j, (inputs, labels) in enumerate(self.data["test_dataloader"]):
-                inputs = inputs.cuda()
-                labels = labels.cuda()
-
-                # Forward pass - compute outputs on input data using the model
-                outputs = net(inputs)
-
-                # Compute loss
-                loss = criterion(outputs, labels)
-
-                # Compute the total loss for the batch and add it to valid_loss
-                test_loss += loss.item() * inputs.size(0)
-
-                # Calculate validation accuracy
-                ret, predictions = torch.max(outputs.data, 1)
-                print(predictions.cpu().numpy()[0])
-                correct_counts = predictions.eq(labels.data.view_as(predictions))
-
-                # Convert correct_counts to float and then compute the mean
-                acc = torch.mean(correct_counts.type(torch.FloatTensor))
-
-                # Compute total accuracy in the whole batch and add to valid_acc
-                test_acc += acc.item() * inputs.size(0)
-
-                print("Test Batch number: {:03d}/{:03d}, Test Loss: {:.4f}, "
-                      "Test Accuracy: {:.4f}".format(j, num_test_data_batches, loss.item(), acc.item() * 100))
-
-            avg_test_loss = test_loss / test_data_size
-            avg_test_acc = test_acc / float(test_data_size)
-
-            test_hist.append([avg_test_loss, avg_test_acc])
-
-            print("Test: Loss : {:.4f}, Accuracy: {:.4f}%".format(avg_test_loss, avg_test_acc * 100))
-
-        # writing stats
-
-        stats["hyperparameters"] = dict()
-        stats["device"] = dict()
-        stats["device"]["type"] = ["gpu" if self.config["HYPERPARAMETERS"]["GPU"] else "cpu"][0]
-        stats["device"]["parallel"] = self.config["HYPERPARAMETERS"]["PARALLEL"]
-        stats["device"]["devices"] = list()
-        if stats["device"]["type"] == "gpu":
-            if isinstance(self.config["HYPERPARAMETERS"]["DEVICES"], list):
-                for dev in self.config["HYPERPARAMETERS"]["DEVICES"]:
-                    info = dict()
-                    info["id"] = dev
-                    info["device_name"] = torch.cuda.get_device_properties(dev).name
-                    info["total_memory (MB)"] = torch.cuda.get_device_properties(dev).total_memory * (2 ** -20)
-                    stats["device"]["devices"].append(info)
-            else:
-                info = dict()
-                info["id"] = self.config["HYPERPARAMETERS"]["DEVICES"][0]
-                info["device_name"] = torch.cuda.get_device_properties(info["id"]).name
-                info["total_memory (MB)"] = torch.cuda.get_device_properties(info["id"]).total_memory * (2 ** -20)
-                stats["device"]["devices"].append(info)
-        stats["hyperparameters"]["epochs"] = self.config["HYPERPARAMETERS"]["EPOCHS"]
-        stats["hyperparameters"]["learning_rate"] = self.config["HYPERPARAMETERS"]["LR"]
-        stats["hyperparameters"]["batch_size"] = self.config["HYPERPARAMETERS"]["BATCH_SIZE"]
-        stats["hyperparameters"]["optimizer"] = self.config["HYPERPARAMETERS"]["OPTIMIZER"]
-        stats["hyperparameters"]["activation"] = self.config["HYPERPARAMETERS"]["ACTIVATION"]
-        if stats["device"]["parallel"]:
-            stats["hyperparameters"]["dropout"] = net.module.dropout.p
-        else:
-            stats["hyperparameters"]["dropout"] = net.dropout.p
-        stats["metrics"] = dict()
-        stats["metrics"]["training_loss"] = history[-1][0]
-        stats["metrics"]["training_accuracy"] = history[-1][2]
-        stats["metrics"]["validation_loss"] = history[-1][1]
-        stats["metrics"]["validation_accuracy"] = history[-1][3]
-        stats["metrics"]["test_loss"] = test_hist[-1][0]
-        stats["metrics"]["test_accuracy"] = test_hist[-1][1]
-        stats["metrics"]["runtime (secs)"] = train_stop - train_start
-        stats["training_history"] = history
-        stats["test_history"] = test_hist
-
-
-        with open(output_path + "/" + self.config["DATALOADER"]["STATS_PATH"], 'w') as outfile:
-            json.dump(stats, outfile, indent=2)
-
-        print(stats)
-
-        # 1383.2083 seconds for 1 epoch. about 9.605 hours for 25. early stopped after 1 epoch. 576.33 mins
+        # terminating program
+        sys.exit(1)
 
 
 if __name__ == '__main__':
