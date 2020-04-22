@@ -1,26 +1,23 @@
-import torch, warnings, torchvision, os, h5py, time, yaml, datetime, logging
+import torch, warnings, torchvision, os, json, time, yaml, datetime, logging, argparse
 from utils.DataGen import DataGen
+from model import AgeNet, GenderNet
 import numpy as np
 import torch.optim as optim
 import torch.nn as nn
 from torchvision.utils import save_image
 import torch.backends.cudnn as cudnn
-import json
 import matplotlib.pyplot as plt
+
 
 warnings.filterwarnings('ignore')
 logging.getLogger('matplotlib.font_manager').disabled = True
 
-# only A and B
-categories = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-              'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-              'space', 'nothing', 'del']
-
 
 class Main(DataGen):
 
-    def __init__(self):
+    def __init__(self, args):
         # loading the YAML configuration file
+        self.args = args  # user configurable parameters
         with open("config.yaml", 'r') as stream:
             try:
                 self.config = yaml.safe_load(stream)
@@ -38,7 +35,7 @@ class Main(DataGen):
         self.logger = self.get_loggers(self.logger_name)
         self.logger.info("Age and Gender Inference!")
         self.logger.info("Current time: " + str(self.current_time))
-        self.train_on_gpu = False
+        self.train_on_gpu = self.config["GPU"]["STATUS"]
         DataGen.__init__(self, self.config, self.logger)
         os.chdir("..")  # change directory to base path
 
@@ -138,7 +135,7 @@ class Main(DataGen):
                 self.logger.debug("Batch label tensor dimensions: {}".format(str(target.shape)))
                 break
 
-        # net = Net()
+        net = lambda x: AgeNet() if self.args.age_gender == "age" else GenderNet()
 
         if self.train_on_gpu:
             net = net.cuda()
@@ -422,5 +419,12 @@ class Main(DataGen):
 
 
 if __name__ == '__main__':
-    m = Main()
+    parser = argparse.ArgumentParser(description='Age and Gender Inference')
+    parser.add_argument('-i', '--input', type=str,
+                        help='Path to input image or video file. Skip this argument to capture frames from a '
+                             'camera.')
+    parser.add_argument('-ag', "--age-gender", type=str, default="age", help="mention classification needs to be "
+                                                                             "performed - age or gender")
+    args = parser.parse_args()
+    m = Main(args)
     m.main()
