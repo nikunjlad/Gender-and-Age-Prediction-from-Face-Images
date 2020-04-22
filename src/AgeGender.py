@@ -6,7 +6,6 @@ def getFaceBox(net, frame, conf_threshold=0.7):
     frameOpencvDnn = frame.copy()   # create a copy of the original frame
     frameHeight = frameOpencvDnn.shape[0]   # get the height of the frame
     frameWidth = frameOpencvDnn.shape[1]   # get the width of the frame
-    print(frameHeight, frameWidth)
 
     # creating a blob from the input image. Here, we pass in the frame having original size, scaling ratio of 1.0,
     # output shape of the blob is 300x300, BGR mean values to subtract from the image, BRSwap to swap the B and R
@@ -81,34 +80,46 @@ while cv2.waitKey(1) < 0:
     # pass the input frame along with face net model for getting bounding box information
     frameFace, bboxes = getFaceBox(faceNet, frame)
 
-    # if the bounding box list is empty, just display empty frames
+    # if the bounding box list is empty, just display empty frames, with a message of no face detected
     if not bboxes:
         print("No face Detected, Checking next frame")
         cv2.putText(frameFace, "No face detected!", (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2,
-                    cv2.LINE_AA)
-        cv2.imshow("Age Gender Demo", frameFace)
+                    cv2.LINE_AA)    # render a message on the blank frame with no face
+        cv2.imshow("Age Gender Demo", frameFace)   # display empty frames with message
+    else:
+        # loop over all the bounding box detections if they exist
+        for bbox in bboxes:
+            # extend bounding box by 20 pixels on each side, essentially padding by 20 pixels taking into account
+            # the factor that face may go out of frame. max and min functions are there to limit to the box dimensions
+            # to the frame sizes
+            face = frame[max(0, bbox[1] - padding):min(bbox[3] + padding, frame.shape[0] - 1),
+                   max(0, bbox[0] - padding):min(bbox[2] + padding, frame.shape[1] - 1)]
 
-    for bbox in bboxes:
-        # print(bbox)
-        face = frame[max(0, bbox[1] - padding):min(bbox[3] + padding, frame.shape[0] - 1),
-               max(0, bbox[0] - padding):min(bbox[2] + padding, frame.shape[1] - 1)]
+            # reshape the face image to 227x227 using the blob function and also swapping the RB planes
+            blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
 
-        blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
-        genderNet.setInput(blob)
-        genderPreds = genderNet.forward()
-        gender = genderList[genderPreds[0].argmax()]
-        # print("Gender Output : {}".format(genderPreds))
-        print("Gender : {}, conf = {:.3f}".format(gender, genderPreds[0].max()))
+            # predict Gender
+            genderNet.setInput(blob)   # pass the 227x227 reshaped face blob to the gender net for prediction
+            genderPreds = genderNet.forward()  # do the forward pass
+            gender = genderList[genderPreds[0].argmax()]   # get the gender
 
-        ageNet.setInput(blob)
-        agePreds = ageNet.forward()
-        age = ageList[agePreds[0].argmax()]
-        print("Age Output : {}".format(agePreds))
-        print("Age : {}, conf = {:.3f}".format(age, agePreds[0].max()))
+            # print the gender along with its confidence score
+            print("Gender : {}, conf = {:.3f}".format(gender, genderPreds[0].max()))
 
-        label = "{},{}".format(gender, age)
-        cv2.putText(frameFace, label, (bbox[0], bbox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2,
-                   cv2.LINE_AA)
-        cv2.imshow("Age Gender Demo", frameFace)
-        # cv.imwrite("age-gender-out-{}".format(args.input),frameFace)
+            # predict Age
+            ageNet.setInput(blob)   # pass the 227x227 face blob to the age net.
+            agePreds = ageNet.forward()  # do forward pass
+            age = ageList[agePreds[0].argmax()]  # get the age range
+
+            # print the age along with its confidence score
+            print("Age : {}, conf = {:.3f}".format(age, agePreds[0].max()))
+
+            # get the label to display on the image frame
+            label = "{},{}".format(gender, age)
+
+            # place the text on the image with squared bounding box
+            cv2.putText(frameFace, label, (bbox[0], bbox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2,
+                       cv2.LINE_AA)
+            cv2.imshow("Age Gender Demo", frameFace)
+
     print("time : {:.3f}".format(time.time() - t))

@@ -89,7 +89,7 @@ class Main(DataGen):
             valid_loss = 0.0
             valid_acc = 0.0
 
-            for i, (inputs, labels) in enumerate(self.data[args.age_gender]["train_dataloader"]):
+            for i, (inputs, labels) in enumerate(tqdm(self.data[args.age_gender]["train_dataloader"])):
 
                 scheduler.step()  # stepping through the learning rate for optimal convergence
 
@@ -116,9 +116,9 @@ class Main(DataGen):
                 # Compute total accuracy in the whole batch and add to train_acc
                 train_acc += acc.item() * inputs.size(0)
 
-                print("Batch: {:03d}/{:03d}, Training Loss: {:.4f}, "
-                      "Training Acc: {:.4f}".format(i, stats["data"]["training"]["num_batches"], loss.item(),
-                                                    acc.item() * 100))
+                # print("Batch: {:03d}/{:03d}, Training Loss: {:.4f}, "
+                #       "Training Acc: {:.4f}".format(i, stats["data"]["training"]["num_batches"], loss.item(),
+                #                                     acc.item() * 100))
 
             # Validation - No gradient tracking needed
             with torch.no_grad():
@@ -147,9 +147,9 @@ class Main(DataGen):
                     # Compute total accuracy in the whole batch and add to valid_acc
                     valid_acc += acc.item() * inputs.size(0)
 
-                    print("Validation Batch number: {:03d}/{:03d}, Validation Loss: {:.4f}, "
-                          "Validation Acc: {:.4f}".format(j, stats["data"]["validation"]["num_batches"], loss.item(),
-                                                          acc.item() * 100))
+                    # print("Validation Batch number: {:03d}/{:03d}, Validation Loss: {:.4f}, "
+                    #       "Validation Acc: {:.4f}".format(j, stats["data"]["validation"]["num_batches"], loss.item(),
+                    #                                       acc.item() * 100))
 
             # resetting scheduler
             scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, stats["data"]["training"]["num_batches"],
