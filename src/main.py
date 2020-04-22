@@ -17,7 +17,7 @@ class Main(DataGen):
     def __init__(self, args):
         # loading the YAML configuration file
         self.args = args  # user configurable parameters
-        with open("config.yaml", 'r') as stream:
+        with open("../configs/config.yaml", 'r') as stream:
             try:
                 self.config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
