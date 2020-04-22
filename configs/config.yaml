@@ -1,0 +1,39 @@
+---
+DATA:
+  DATA_DIR: "/Users/nikunjlad"
+  OUTPUT_DIR: "output"
+  STATS_PATH: "output/stats"
+  PLOT_PATH: "output/plots"
+HYPERPARAMETERS:
+  OPTIMIZER:
+    NAME: SGD
+    MOMENTUM: 0.9
+    WT_DECAY: 5e-4
+    LR: 0.005
+  EPOCHS: 25
+  LOSS: CROSS_ENTROPY_LOSS
+  BATCH_SIZE: 64
+  PLOT_IMG: False
+DATALOADER:
+  DATASET_NAME: "adience"
+  VALIDATION_SPLIT: 0.1
+GPU:
+  STATUS: True
+  DEVICES: [0,1,2]
+  PARALLEL: True
+TEST:
+  IMG_PATH: ""
+  AGE:
+    AGE_PROTO: "age_deploy.prototxt"
+    AGE_CAFFE: "age_net.caffemodel"
+  GENDER:
+    GENDER_PROTO: "gender_deploy.prototxt"
+    GENDER_CAFFE:
+
+
+
+
+
+
+
+

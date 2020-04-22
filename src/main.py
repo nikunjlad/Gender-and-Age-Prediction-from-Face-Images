@@ -28,13 +28,15 @@ class Main(DataGen):
                 print(exc)
 
         self.current_time = datetime.datetime.now().strftime("%Y-%m-%d__%H.%M")  # get current datetime
+        if not os.path.exists(self.config["DATA"]["OUTPUT_DIR"]):
+            os.mkdir(self.config["DATA"]["OUTPUT_DIR"])
         if not os.path.exists("logs"):
             os.mkdir("logs")  # make log directory if does not exist
         os.chdir("logs")  # change to logs directory
         # getting the custom logger
-        self.logger_name = "asl_" + self.current_time + "_.log"
+        self.logger_name = "face_" + self.current_time + "_.log"
         self.logger = self.get_loggers(self.logger_name)
-        self.logger.info("ASL Detection!")
+        self.logger.info("Age and Gender Inference!")
         self.logger.info("Current time: " + str(self.current_time))
         self.train_on_gpu = False
         DataGen.__init__(self, self.config, self.logger)
@@ -42,7 +44,7 @@ class Main(DataGen):
 
     @staticmethod
     def get_loggers(name):
-        logger = logging.getLogger()  # name the logger as asl
+        logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         f_hand = logging.FileHandler(name)  # file where the custom logs needs to be handled
         f_hand.setLevel(logging.DEBUG)  # level to set for logging the errors
@@ -65,56 +67,63 @@ class Main(DataGen):
             self.logger.info('Training on CPU ...')
         else:
             torch.cuda.set_device(device_id)
-            self.logger.info(
-                'CUDA is available! Training on {} NVidia {} GPUs'.format(str(len(self.config["HYPERPARAMETERS"]["DEVICES"])),
-                                                                     str(torch.cuda.get_device_name(0))))
+            self.logger.info('CUDA is available! Training on {} NVidia {} GPUs'.format(
+                str(len(self.config["HYPERPARAMETERS"]["DEVICES"])), str(torch.cuda.get_device_name(0))))
 
     def main(self):
         """
         This is the wrapper function which calls and generates data from other classes and helper functions
         :return: main program execution
         """
-        stats = dict()
+        stats = dict()  # to capture running statistics
 
+        # 1. cONFIGURING GPU
         # configure GPU if available
-        if self.config["HYPERPARAMETERS"]["GPU"]:
-            if self.config["HYPERPARAMETERS"]["DEVICES"] is not None:
-                self.configure_cuda(self.config["HYPERPARAMETERS"]["DEVICES"][0])
+        if self.config["GPU"]["STATUS"]:
+            if self.config["GPU"]["DEVICES"] is not None:
+                self.configure_cuda(self.config["GPU"]["DEVICES"][0])
 
+        # 2. configuring paths
         # configure data path
-        if os.getenv("HOME") != self.config["DATALOADER"]["DATA_DIR"]:
-            self.config["DATALOADER"]["DATA_DIR"] = os.getenv("HOME")
+        if os.getenv("HOME") != self.config["DATA"]["DATA_DIR"]:
+            self.config["DATA"]["DATA_DIR"] = os.getenv("HOME")
+        stats_path = self.config["DATA"]["STATS_PATH"]
+        plot_path = self.config["DATA"]["PLOT_PATH"]
 
-        classes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-                   'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-                   'space', 'nothing', 'del']
+        # 3. configuring target labels, in our case we have 2 classification tasks, gender and age classification
+        ages = ["(0, 2)", "(4, 6)", "(8, 12)", "(15, 20)", "(21, 24)", "(25, 32)",
+                "(33, 37)", "(38, 43)", "(44, 47)", "(48, 53)", "(54, 59)", "(60, 100)"]
 
-        # loading data
-        data_path = os.path.join(self.config["DATALOADER"]["DATA_DIR"], "data/asl/alphabets.h5")
-        output_path = os.path.join("output/", self.config["DATALOADER"]["OUTPUT_PATH"])
-        os.mkdir(output_path)
+        genders = ["m", "f"]
 
+        # 4. loading data
+        data_path = os.path.join(self.config["DATA"]["DATA_DIR"], "data", self.config["DATALOADER"]["DATASET_NAME"],
+                                 "adience.h5")
         self.load_data_from_h5(data_path)
         self.split_data()
         self.configure_dataloaders()
 
-        # get training, validation and testing dataset sizes and number of batches in each
-        train_data_size = len(self.data["train_dataset"])
-        valid_data_size = len(self.data["valid_dataset"])
-        test_data_size = len(self.data["test_dataset"])
-        num_train_data_batches = len(self.data["train_dataloader"])
-        num_valid_data_batches = len(self.data["valid_dataloader"])
-        num_test_data_batches = len(self.data["test_dataloader"])
+        # 5. getting dataloader information, batch size and sample counts
+        # since age and gender both are split using same validation ratio, their sizes will be same.
+        train_data_size = len(self.data["train_dataset_age"])
+        valid_data_size = len(self.data["valid_dataset_age"])
+        test_data_size = len(self.data["test_dataset_age"])
+        num_train_data_batches = len(self.data["train_dataloader_age"])
+        num_valid_data_batches = len(self.data["valid_dataloader_age"])
+        num_test_data_batches = len(self.data["test_dataloader_age"])
 
-        # display batch information
+        # 6. display batch information
         self.logger.info("Number of training samples: {}".format(str(train_data_size)))
-        self.logger.info("{} batches each having 64 samples".format(str(num_train_data_batches)))
+        self.logger.info("{} batches each having {} samples".format(str(num_train_data_batches),
+                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
         self.logger.info("Number of validation samples: {}".format(str(valid_data_size)))
-        self.logger.info("{} batches each having 64 samples".format(str(num_valid_data_batches)))
+        self.logger.info("{} batches each having {} samples".format(str(num_valid_data_batches),
+                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
         self.logger.info("Number of testing samples: {}".format(str(test_data_size)))
-        self.logger.info("{} batches each having 64 samples".format(str(num_test_data_batches)))
+        self.logger.info("{} batches each having {} samples".format(str(num_test_data_batches),
+                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
 
-        # export a subset of images
+        # 7. export a grid of images or exploring our data visually
         batch = next(iter(self.data["test_dataloader"]))
         images, labels = batch
 
@@ -129,7 +138,7 @@ class Main(DataGen):
                 self.logger.debug("Batch label tensor dimensions: {}".format(str(target.shape)))
                 break
 
-        net = Net()
+        # net = Net()
 
         if self.train_on_gpu:
             net = net.cuda()
