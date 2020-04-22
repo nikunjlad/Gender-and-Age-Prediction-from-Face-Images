@@ -30,6 +30,8 @@ class DataGen:
 
     def __init__(self, config, logger):
         self.data = dict()
+        self.data["age"] = dict()
+        self.data["gender"] = dict()
         self.config = config
         self.logger = logger
 
@@ -39,16 +41,16 @@ class DataGen:
         # train, test data with labels being converted to numpy array from HDF5 format
         self.data["x_train"] = np.array(hf.get("x_train"), dtype=np.float32)
         self.data["x_test"] = np.array(hf.get("x_test"), dtype=np.float32)
-        self.data["y_train_age"] = np.array(hf.get("y_train_age"), dtype=np.int64)
-        self.data["y_test_age"] = np.array(hf.get("y_test_age"), dtype=np.int64)
-        self.data["y_train_gender"] = np.array(hf.get("y_train_gender"), dtype=np.int64)
-        self.data["y_test_gender"] = np.array(hf.get("y_test_gender"), dtype=np.int64)
+        self.data["age"]["y_train"] = np.array(hf.get("y_train_age"), dtype=np.int64)
+        self.data["age"]["y_test"] = np.array(hf.get("y_test_age"), dtype=np.int64)
+        self.data["gender"]["y_train"] = np.array(hf.get("y_train_gender"), dtype=np.int64)
+        self.data["gender"]["y_test"] = np.array(hf.get("y_test_gender"), dtype=np.int64)
         self.logger.debug("Training data: {}".format(str(self.data["x_train"].shape)))
         self.logger.debug("Testing data: {}".format(str(self.data["x_test"].shape)))
-        self.logger.debug("Training labels: {}".format(str(self.data["y_train_age"].shape)))
-        self.logger.debug("Testing labels: {}".format(str(self.data["y_test_age"].shape)))
-        self.logger.debug("Training labels: {}".format(str(self.data["y_train_gender"].shape)))
-        self.logger.debug("Testing labels: {}".format(str(self.data["y_test_gender"].shape)))
+        self.logger.debug("Training labels: {}".format(str(self.data["age"]["y_train"].shape)))
+        self.logger.debug("Testing labels: {}".format(str(self.data["age"]["y_test"].shape)))
+        self.logger.debug("Training labels: {}".format(str(self.data["gender"]["y_train"].shape)))
+        self.logger.debug("Testing labels: {}".format(str(self.data["gender"]["y_test"].shape)))
         self.logger.debug("Dataset read successfully!\n")
 
     def split_data(self):
@@ -59,23 +61,23 @@ class DataGen:
         np.random.shuffle(indices)  # shuffle data randomly
         split = int(np.floor(valid_size * num_train))  # split threshold
         train_idx, valid_idx = indices[split:], indices[:split]  # split data
-        X_train = self.data["x_train"][train_idx, :, :, :]
-        X_valid = self.data["x_train"][valid_idx, :, :, :]
-        y_train_age = self.data["y_train_age"][train_idx]
-        y_valid_age = self.data["y_train_age"][valid_idx]
-        y_train_gender = self.data["y_train_gender"][train_idx]
-        y_valid_gender = self.data["y_train_gender"][valid_idx]
+        x_train = self.data["x_train"][train_idx, :, :, :]
+        x_valid = self.data["x_train"][valid_idx, :, :, :]
+        y_train_age = self.data["age"]["y_train"][train_idx]
+        y_valid_age = self.data["age"]["y_train"][valid_idx]
+        y_train_gender = self.data["gender"]["y_train"][train_idx]
+        y_valid_gender = self.data["gender"]["y_train"][valid_idx]
 
         # convert data to lists
-        self.data["x_train"] = list(X_train.transpose(0, 3, 1, 2))  # training data
-        self.data["x_valid"] = list(X_valid.transpose(0, 3, 1, 2))  # validation data
+        self.data["x_train"] = list(x_train.transpose(0, 3, 1, 2))  # training data
+        self.data["x_valid"] = list(x_valid.transpose(0, 3, 1, 2))  # validation data
         self.data["x_test"] = list(self.data["x_test"].transpose(0, 3, 1, 2))  # test data
-        self.data["y_train_age"] = list(y_train_age)  # training age labels
-        self.data["y_valid_age"] = list(y_valid_age)  # validation age labels
-        self.data["y_train_gender"] = list(y_train_gender)  # training gender labels
-        self.data["y_valid_gender"] = list(y_valid_gender)  # validation gender labels
-        self.data["y_test_age"] = list(self.data["y_test_age"])  # testing age labels
-        self.data["y_test_gender"] = list(self.data["y_test_gender"])  # testing gender labels
+        self.data["age"]["y_train"] = list(y_train_age)  # training age labels
+        self.data["age"]["y_valid"] = list(y_valid_age)  # validation age labels
+        self.data["age"]["y_test"] = list(self.data["age"]["y_test"])  # testing age labels
+        self.data["gender"]["y_train"] = list(y_train_gender)  # training gender labels
+        self.data["gender"]["y_valid"] = list(y_valid_gender)  # validation gender labels
+        self.data["gender"]["y_test"] = list(self.data["gender"]["y_test"])  # testing gender labels
 
     def configure_dataloaders(self):
         transform_train = transforms.Compose([
@@ -91,26 +93,29 @@ class DataGen:
         ])
 
         # Age Dataloaders
-        self.data["train_dataset_age"] = Data(self.data["x_train"], self.data["y_train_age"], transform=transform_train)
-        self.data["valid_dataset_age"] = Data(self.data["x_valid"], self.data["y_valid_age"], transform=transform_test)
-        self.data["test_dataset_age"] = Data(self.data["x_test"], self.data["y_test_age"], transform=transform_test)
-        self.data["train_dataloader_age"] = DataLoader(self.data["train_dataset_age"],
-                                                       batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
-        self.data["valid_dataloader_age"] = DataLoader(self.data["valid_dataset_age"],
-                                                       batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
-        self.data["test_dataloader_age"] = DataLoader(self.data["test_dataset_age"],
-                                                      batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
+        self.data["age"]["train_dataset"] = Data(self.data["x_train"], self.data["age"]["y_train"],
+                                                 transform=transform_train)
+        self.data["age"]["valid_dataset"] = Data(self.data["x_valid"], self.data["age"]["y_valid"],
+                                                 transform=transform_test)
+        self.data["age"]["test_dataset"] = Data(self.data["x_test"], self.data["age"]["y_test"],
+                                                transform=transform_test)
+        self.data["age"]["train_dataloader"] = DataLoader(self.data["age"]["train_dataset"],
+                                                          batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
+        self.data["age"]["valid_dataloader"] = DataLoader(self.data["age"]["valid_dataset"],
+                                                          batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
+        self.data["age"]["test_dataloader"] = DataLoader(self.data["age"]["test_dataset"],
+                                                         batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
 
         # Gender Dataloaders
-        self.data["train_dataset_gender"] = Data(self.data["x_train"], self.data["y_train_gender"],
-                                                 transform=transform_train)
-        self.data["valid_dataset_gender"] = Data(self.data["x_valid"], self.data["y_valid_gender"],
-                                                 transform=transform_test)
-        self.data["test_dataset_gender"] = Data(self.data["x_test"], self.data["y_test_gender"],
-                                                transform=transform_test)
-        self.data["train_dataloader_gender"] = DataLoader(self.data["train_dataset_gender"],
-                                                          batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
-        self.data["valid_dataloader_gender"] = DataLoader(self.data["valid_dataset_gender"],
-                                                          batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
-        self.data["test_dataloader_gender"] = DataLoader(self.data["test_dataset_gender"],
-                                                         batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
+        self.data["gender"]["train_dataset"] = Data(self.data["x_train"], self.data["gender"]["y_train"],
+                                                    transform=transform_train)
+        self.data["gender"]["valid_dataset"] = Data(self.data["x_valid"], self.data["gender"]["y_valid"],
+                                                    transform=transform_test)
+        self.data["gender"]["test_dataset"] = Data(self.data["x_test"], self.data["gender"]["y_test"],
+                                                   transform=transform_test)
+        self.data["gender"]["train_dataloader"] = DataLoader(self.data["gender"]["train_dataset"],
+                                                             batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
+        self.data["gender"]["valid_dataloader"] = DataLoader(self.data["gender"]["valid_dataset"],
+                                                             batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])
+        self.data["gender"]["test_dataloader"] = DataLoader(self.data["gender"]["test_dataset"],
+                                                            batch_size=self.config["HYPERPARAMETERS"]["BATCH_SIZE"])

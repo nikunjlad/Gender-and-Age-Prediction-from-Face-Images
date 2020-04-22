@@ -67,90 +67,8 @@ class Main(DataGen):
             self.logger.info('CUDA is available! Training on {} NVidia {} GPUs'.format(
                 str(len(self.config["HYPERPARAMETERS"]["DEVICES"])), str(torch.cuda.get_device_name(0))))
 
-    def main(self):
-        """
-        This is the wrapper function which calls and generates data from other classes and helper functions
-        :return: main program execution
-        """
-        stats = dict()  # to capture running statistics
+    def train(self, net, epochs, optimizer, criterion, scheduler, stats):
 
-        # 1. cONFIGURING GPU
-        # configure GPU if available
-        if self.config["GPU"]["STATUS"]:
-            if self.config["GPU"]["DEVICES"] is not None:
-                self.configure_cuda(self.config["GPU"]["DEVICES"][0])
-
-        # 2. configuring paths
-        # configure data path
-        if os.getenv("HOME") != self.config["DATA"]["DATA_DIR"]:
-            self.config["DATA"]["DATA_DIR"] = os.getenv("HOME")
-        stats_path = self.config["DATA"]["STATS_PATH"]
-        plot_path = self.config["DATA"]["PLOT_PATH"]
-
-        # 3. configuring target labels, in our case we have 2 classification tasks, gender and age classification
-        ages = ["(0, 2)", "(4, 6)", "(8, 12)", "(15, 20)", "(21, 24)", "(25, 32)",
-                "(33, 37)", "(38, 43)", "(44, 47)", "(48, 53)", "(54, 59)", "(60, 100)"]
-
-        genders = ["m", "f"]
-
-        # 4. loading data
-        data_path = os.path.join(self.config["DATA"]["DATA_DIR"], "data", self.config["DATALOADER"]["DATASET_NAME"],
-                                 "adience.h5")
-        self.load_data_from_h5(data_path)
-        self.split_data()
-        self.configure_dataloaders()
-
-        # 5. getting dataloader information, batch size and sample counts
-        # since age and gender both are split using same validation ratio, their sizes will be same.
-        train_data_size = len(self.data["train_dataset_age"])
-        valid_data_size = len(self.data["valid_dataset_age"])
-        test_data_size = len(self.data["test_dataset_age"])
-        num_train_data_batches = len(self.data["train_dataloader_age"])
-        num_valid_data_batches = len(self.data["valid_dataloader_age"])
-        num_test_data_batches = len(self.data["test_dataloader_age"])
-
-        # 6. display batch information
-        self.logger.info("Number of training samples: {}".format(str(train_data_size)))
-        self.logger.info("{} batches each having {} samples".format(str(num_train_data_batches),
-                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
-        self.logger.info("Number of validation samples: {}".format(str(valid_data_size)))
-        self.logger.info("{} batches each having {} samples".format(str(num_valid_data_batches),
-                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
-        self.logger.info("Number of testing samples: {}".format(str(test_data_size)))
-        self.logger.info("{} batches each having {} samples".format(str(num_test_data_batches),
-                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
-
-        # 7. export a grid of images or exploring our data visually
-        batch = next(iter(self.data["test_dataloader"]))
-        images, labels = batch
-
-        if self.config["HYPERPARAMETERS"]["PLOT_IMG"]:
-            grid = torchvision.utils.make_grid(images[:64], nrow=8)
-            self.logger.debug(type(grid))
-            plt.figure(figsize=(10, 10))
-            np.transpose(grid, (1, 2, 0))
-            save_image(grid, 'grid.png')
-            for data, target in self.data["test_dataloader"]:
-                self.logger.debug("Batch image tensor dimensions: {}".format(str(data.shape)))
-                self.logger.debug("Batch label tensor dimensions: {}".format(str(target.shape)))
-                break
-
-        net = lambda x: AgeNet() if self.args.age_gender == "age" else GenderNet()
-
-        if self.train_on_gpu:
-            net = net.cuda()
-        self.logger.debug(str(net))
-
-        if self.config["HYPERPARAMETERS"]["PARALLEL"]:
-            net = torch.nn.DataParallel(net, device_ids=self.config["HYPERPARAMETERS"]["DEVICES"])
-
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(),
-                              lr=self.config["HYPERPARAMETERS"]["LR"], momentum=0.9, weight_decay=5e-4)
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, num_train_data_batches, eta_min=0)
-
-        # training and validation loop
-        epochs = self.config["HYPERPARAMETERS"]["EPOCHS"]
         history = list()
         train_start = time.time()
         best_val_loss = float('inf')
@@ -183,13 +101,9 @@ class Main(DataGen):
 
                 # Forward pass - compute outputs on input data using the model
                 outputs = net(inputs)
-                # self.logger.debug("Output of the model: {}".format(str(outputs)))
-                # self.logger.debug("Output shape: {}".format(str(outputs.shape)))
 
                 # Compute loss
                 loss = criterion(outputs, labels)
-                # self.logger.debug("Loss: {}".format(str(loss)))
-                # self.logger.debug("Loss shape: {}".format(str(loss.shape)))
 
                 # Backpropagate the gradients
                 loss.backward()
@@ -199,7 +113,6 @@ class Main(DataGen):
 
                 # Compute the total loss for the batch and add it to train_loss
                 train_loss += loss.item() * inputs.size(0)
-                # self.logger.debug(str(train_loss))
 
                 # Compute the accuracy
                 ret, predictions = torch.max(outputs.data, 1)
@@ -212,7 +125,7 @@ class Main(DataGen):
                 train_acc += acc.item() * inputs.size(0)
 
                 print("Batch: {:03d}/{:03d}, Training Loss: {:.4f}, "
-                      "Training Acc: {:.4f}".format(i, num_train_data_batches, loss.item(), acc.item() * 100))
+                      "Training Acc: {:.4f}".format(i, stats["data"]["training"]["num_batches"], loss.item(), acc.item() * 100))
 
             # Validation - No gradient tracking needed
             with torch.no_grad():
@@ -247,18 +160,18 @@ class Main(DataGen):
                     valid_acc += acc.item() * inputs.size(0)
 
                     print("Validation Batch number: {:03d}/{:03d}, Validation Loss: {:.4f}, "
-                          "Validation Acc: {:.4f}".format(j, num_valid_data_batches, loss.item(), acc.item() * 100))
+                          "Validation Acc: {:.4f}".format(j, stats["data"]["validation"]["num_batches"], loss.item(), acc.item() * 100))
 
             # resetting scheduler
-            scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, num_train_data_batches, eta_min=0)
+            scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, stats["data"]["training"]["num_batches"], eta_min=0)
 
             # Find average training loss and training accuracy
-            avg_train_loss = train_loss / train_data_size
-            avg_train_acc = train_acc / float(train_data_size)
+            avg_train_loss = train_loss / stats["data"]["training"]["num_samples"]
+            avg_train_acc = train_acc / float(stats["data"]["training"]["num_samples"])
 
             # Find average training loss and training accuracy
-            avg_valid_loss = valid_loss / valid_data_size
-            avg_valid_acc = valid_acc / float(valid_data_size)
+            avg_valid_loss = valid_loss / stats["data"]["validation"]["num_samples"]
+            avg_valid_acc = valid_acc / float(stats["data"]["validation"]["num_samples"])
 
             history.append([avg_train_loss, avg_valid_loss, avg_train_acc, avg_valid_acc])
 
@@ -278,6 +191,114 @@ class Main(DataGen):
 
         train_stop = time.time()
         self.logger.info("Time taken for training: {}".format(str(train_stop - train_start)))
+
+
+    def main(self):
+        """
+        Main function for program execution
+        :return:
+        """
+        stats = dict()  # to capture running statistics
+
+        # 1. configuring GPU
+        # configure GPU if available
+        if self.config["GPU"]["STATUS"]:
+            if self.config["GPU"]["DEVICES"] is not None:
+                self.configure_cuda(self.config["GPU"]["DEVICES"][0])
+
+        # 2. configuring paths
+        # configure data path
+        if os.getenv("HOME") != self.config["DATA"]["DATA_DIR"]:
+            self.config["DATA"]["DATA_DIR"] = os.getenv("HOME")
+        stats_path = self.config["DATA"]["STATS_PATH"]
+        plot_path = self.config["DATA"]["PLOT_PATH"]
+
+        # 3. configuring target labels, in our case we have 2 classification tasks, gender and age classification
+        ages = ["(0, 2)", "(4, 6)", "(8, 12)", "(15, 20)", "(21, 24)", "(25, 32)",
+                "(33, 37)", "(38, 43)", "(44, 47)", "(48, 53)", "(54, 59)", "(60, 100)"]
+        genders = ["m", "f"]
+
+        # 4. loading data
+        data_path = os.path.join(self.config["DATA"]["DATA_DIR"], "data", self.config["DATALOADER"]["DATASET_NAME"],
+                                 "adience.h5")
+        self.load_data_from_h5(data_path)
+        self.split_data()
+        self.configure_dataloaders()
+
+        # 5. getting dataloader information, batch size and sample counts
+        # since age and gender both are split using same validation ratio, their sizes will be same.
+        train_data_size = len(self.data["train_dataset_age"])
+        valid_data_size = len(self.data["valid_dataset_age"])
+        test_data_size = len(self.data["test_dataset_age"])
+        num_train_data_batches = len(self.data["train_dataloader_age"])
+        num_valid_data_batches = len(self.data["valid_dataloader_age"])
+        num_test_data_batches = len(self.data["test_dataloader_age"])
+
+        # 6. update stats of data information
+        stats["data"] = dict()
+        train_dict = dict()
+        train_dict["num_samples"] = train_data_size
+        train_dict["num_batches"] = num_train_data_batches
+        stats["data"]["training"] = train_dict
+        valid_dict = dict()
+        valid_dict["num_samples"] = valid_data_size
+        valid_dict["num_batches"] = num_valid_data_batches
+        stats["data"]["validation"] = valid_dict
+        test_dict = dict()
+        test_dict["num_samples"] = test_data_size
+        test_dict["num_batches"] = num_test_data_batches
+        stats["data"]["testing"] = test_dict
+
+        # 7. display batch information
+        self.logger.info("Number of training samples: {}".format(str(train_data_size)))
+        self.logger.info("{} batches each having {} samples".format(str(num_train_data_batches),
+                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
+        self.logger.info("Number of validation samples: {}".format(str(valid_data_size)))
+        self.logger.info("{} batches each having {} samples".format(str(num_valid_data_batches),
+                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
+        self.logger.info("Number of testing samples: {}".format(str(test_data_size)))
+        self.logger.info("{} batches each having {} samples".format(str(num_test_data_batches),
+                                                                    str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"])))
+
+        # 8. export a grid of images or exploring our data visually
+        batch = next(iter(self.data["test_dataloader"]))
+        images, labels = batch
+
+        if self.config["HYPERPARAMETERS"]["PLOT_IMG"]:
+            grid = torchvision.utils.make_grid(images[:64], nrow=8)
+            self.logger.debug(type(grid))
+            plt.figure(figsize=(10, 10))
+            np.transpose(grid, (1, 2, 0))
+            save_image(grid, 'grid.png')
+            for data, target in self.data["test_dataloader"]:
+                self.logger.debug("Batch image tensor dimensions: {}".format(str(data.shape)))
+                self.logger.debug("Batch label tensor dimensions: {}".format(str(target.shape)))
+                break
+
+        # 9. loading Network based on the task at hand
+        net = lambda x: AgeNet() if self.args.age_gender == "age" else GenderNet()
+
+        # 10. use GPU if available else cpu by default
+        if self.train_on_gpu:
+            net = net.cuda()
+        self.logger.debug(str(net))
+
+        # 11. data parallel mode if enabled by user for parallel training
+        if self.config["HYPERPARAMETERS"]["PARALLEL"]:
+            net = torch.nn.DataParallel(net, device_ids=self.config["HYPERPARAMETERS"]["DEVICES"])
+            cudnn.benchmark = True
+
+        # 12. optimizers and loss functions and scheduler for auto adjusting learning rate based on performance
+        criterion = nn.CrossEntropyLoss()
+        optimizer = self.config["HYPERPARAMETERS"]["OPTIMIZER"]["NAME"](net.parameters(),
+                                                                        lr=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["LR"],
+                                                                        momentum=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["MOMENTUM"],
+                                                                        weight_decay=self.config["HYPERPARAMETERS"]["OPTIMIZER"]["WT_DECAY"])
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, num_train_data_batches, eta_min=0)
+
+        # training and validation loop
+        epochs = self.config["HYPERPARAMETERS"]["EPOCHS"]
+
 
         # saving model once training is done
         # torch.save(net.state_dict(), 'asl.pt')  # save the resnet model
@@ -396,19 +417,7 @@ class Main(DataGen):
         stats["metrics"]["runtime (secs)"] = train_stop - train_start
         stats["training_history"] = history
         stats["test_history"] = test_hist
-        stats["data"] = dict()
-        train_dict = dict()
-        train_dict["num_samples"] = train_data_size
-        train_dict["num_batches"] = num_train_data_batches
-        stats["data"]["training"] = train_dict
-        valid_dict = dict()
-        valid_dict["num_samples"] = valid_data_size
-        valid_dict["num_batches"] = num_valid_data_batches
-        stats["data"]["validation"] = valid_dict
-        test_dict = dict()
-        test_dict["num_samples"] = test_data_size
-        test_dict["num_batches"] = num_test_data_batches
-        stats["data"]["testing"] = test_dict
+
 
         with open(output_path + "/" + self.config["DATALOADER"]["STATS_PATH"], 'w') as outfile:
             json.dump(stats, outfile, indent=2)

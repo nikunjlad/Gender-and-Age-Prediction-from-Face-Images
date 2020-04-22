@@ -6,7 +6,7 @@ DATA:
   PLOT_PATH: "output/plots"
 HYPERPARAMETERS:
   OPTIMIZER:
-    NAME: SGD
+    NAME: optim.SGD
     MOMENTUM: 0.9
     WT_DECAY: 5e-4
     LR: 0.005
