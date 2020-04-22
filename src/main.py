@@ -219,9 +219,9 @@ class Main(DataGen):
                 # Compute total accuracy in the whole batch and add to valid_acc
                 test_acc += acc.item() * inputs.size(0)
 
-                print("Test Batch number: {:03d}/{:03d}, Test Loss: {:.4f}, "
-                      "Test Accuracy: {:.4f}".format(j, stats["data"]["testing"]["num_batches"], loss.item(),
-                                                     acc.item() * 100))
+                # print("Test Batch number: {:03d}/{:03d}, Test Loss: {:.4f}, "
+                #       "Test Accuracy: {:.4f}".format(j, stats["data"]["testing"]["num_batches"], loss.item(),
+                #                                      acc.item() * 100))
 
             avg_test_loss = test_loss / stats["data"]["testing"]["num_samples"]
             avg_test_acc = test_acc / float(stats["data"]["testing"]["num_samples"])
