@@ -56,12 +56,10 @@ class AgeNet(nn.Module):
         x = self.norm(self.pool(x))
         x = F.relu(self.conv3(x))
         x = self.pool(x)
-        print(x.shape)
         x = x.view(-1, 384 * 6 * 6)
         x = F.relu(self.fc1(x))
         x = self.dropout(x)
         x = F.relu(self.fc2(x))
         x = self.dropout(x)
         x = F.relu(self.fc3(x))
-        print(x.shape)
         return x
