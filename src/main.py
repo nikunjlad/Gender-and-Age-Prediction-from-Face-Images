@@ -304,7 +304,8 @@ class Main(DataGen):
         dir_name = str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "_" + self.config["DATA"]["OUTPUT_DIR"] + "_" + \
                    str(len(self.config["GPU"]["DEVICES"]))
         output_path = os.path.join(self.config["DATA"]["OUTPUT_DIR"], dir_name)
-        os.mkdir(output_path)
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
 
         # 3. configuring target labels, in our case we have 2 classification tasks, gender and age classification
         ages = ["(0, 2)", "(4, 6)", "(8, 12)", "(15, 20)", "(21, 24)", "(25, 32)",
