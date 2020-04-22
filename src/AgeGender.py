@@ -6,9 +6,12 @@ import argparse
 
 
 def getFaceBox(net, frame, conf_threshold=0.7):
-    frameOpencvDnn = frame.copy()
-    frameHeight = frameOpencvDnn.shape[0]
-    frameWidth = frameOpencvDnn.shape[1]
+    frameOpencvDnn = frame.copy()   # create a copy of the original frame
+    frameHeight = frameOpencvDnn.shape[0]   # get the height of the frame
+    frameWidth = frameOpencvDnn.shape[1]   # get the width of the frame
+
+    # creating a blob from the input image. Here, we pass in the frame having original size, scaling ratio of 1.0,
+    # output shape of the blob is 300x300, BGR mean values to subtract from the image,
     blob = cv.dnn.blobFromImage(frameOpencvDnn, 1.0, (300, 300), [104, 117, 123], True, False)
 
     net.setInput(blob)

@@ -231,9 +231,9 @@ class Main(DataGen):
         return test_hist
 
     @staticmethod
-    def plot_graphs(hist, epochs, x_label, y_label, plt_title, fig_size, legend, save_name):
+    def plot_graphs(hist, epochs, x_label, y_label, plt_title, legend, save_name):
 
-        plt.figure(fig_size)
+        plt.figure(figsize=(7,6))
         x = np.array([i for i in range(0, epochs)])
         plt.plot(x, hist[:, 0])
         plt.plot(x, hist[:, 1])
@@ -400,9 +400,9 @@ class Main(DataGen):
         acc_name = output_path + "/train_valid_accuracy_" + str(len(self.config["GPU"]["DEVICES"])) + ".png"
 
         self.plot_graphs(hist, epochs, x_label="Epochs", y_label="Cross-Entropy Loss", plt_title="Loss Curves",
-                         fig_size=(7, 6), legend=['train_loss', 'valid_loss'], save_name=loss_name)
+                         legend=['train_loss', 'valid_loss'], save_name=loss_name)
         self.plot_graphs(hist, epochs, x_label="Epochs", y_label="Accuracy", plt_title="Accuracy Curves",
-                         fig_size=(7, 6), legend=['train_acc', 'valid_acc'], save_name=acc_name)
+                         legend=['train_acc', 'valid_acc'], save_name=acc_name)
 
         # 15. testing
         test_hist = self.test(net, criterion, output_path, model_name, stats, args)
