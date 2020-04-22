@@ -301,7 +301,7 @@ class Main(DataGen):
         # configure data path
         if os.getenv("HOME") != self.config["DATA"]["DATA_DIR"]:
             self.config["DATA"]["DATA_DIR"] = os.getenv("HOME")
-        dir_name = self.config["HYPERPARAMETERS"]["BATCH_SIZE"] + "_" + self.config["DATA"]["OUTPUT_DIR"] + "_" + \
+        dir_name = str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "_" + self.config["DATA"]["OUTPUT_DIR"] + "_" + \
                    str(len(self.config["GPU"]["DEVICES"]))
         output_path = os.path.join(self.config["DATA"]["OUTPUT_DIR"], dir_name)
         os.mkdir(output_path)
