@@ -1,7 +1,7 @@
 # Gender-and-Age-Prediction-from-Face-Images &nbsp; ![](https://img.shields.io/badge/release-v1.0-orange)
 
 ![](https://img.shields.io/badge/license-MIT-blue) &nbsp;<br>
-<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/predictions/multi-person.gif" width="800" height="497">
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/multi-person.gif" width="800" height="497">
 
 ## Architecture &nbsp;
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/age_gender.png">
