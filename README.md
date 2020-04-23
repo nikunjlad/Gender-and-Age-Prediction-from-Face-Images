@@ -113,10 +113,12 @@ Note: More experimentation is required as we yet not conclude the above results 
 
 ### Static Images
 To generate sample images, use
-```python
+```bash
 python sample.py --input=../images/woman.jpg --output=woman.png
 ``` 
-
+</br>
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/true.png">
+</br>
  
 ## Developers &nbsp;
 
