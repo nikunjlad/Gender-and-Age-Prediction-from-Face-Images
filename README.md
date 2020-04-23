@@ -91,6 +91,9 @@ and to train on age use
 python train.py --age-gender=age
 ```
 
+To get pretrained models for transfer learning, download the [age.pt](https://drive.google.com/file/d/1TN1UzN6g87yer_z6VsITwfl0nvmEezZT/view?usp=sharing) and [gender.pt](https://drive.google.com/file/d/1COQv-QLr3L7YHaIYl8OyYRO3Ibvi4jQS/view?usp=sharing) files which were trained for 60 epochs.
+Note: Since, these models were trained by adding 4 new classes, they might have significant bias in them.
+
 Model outputs are save in the <b>output</b> folder. For every run of training, output of the run will be saved in a folder named - <BATCH_SIZE>_output_<NUM_GPUS>, where <BATCH_SIZE> is batch size during current run and <NUM_GPUS> is number of GPUs used for training, example [64_output_3](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/tree/master/src/output/64_output_3)
 
 Every training outputs a [statistics](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/64_output_3/age_stats_64_3.json) file giving runtime parameter dictionary, logs along with accuracy and loss curves and best model. 
