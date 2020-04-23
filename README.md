@@ -121,11 +121,16 @@ We get really good predictions both for Age and Gender as can be seen in below i
 </br>
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/true.png">
 <br><br>
+
 Here is another case of a picture of me and my brother back during our younger days to the times when we were older
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/transition.png">
 </br></br>
+
 However, its not perfect always. Here is a case where it gave pretty weird results
-<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/predictions/friends.png">
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/predictions/friends.png"><br><br>
+
+In case there are no predictions, we get something like this
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/noperson.png">
 
 ## Acknowledges and Credits
 
