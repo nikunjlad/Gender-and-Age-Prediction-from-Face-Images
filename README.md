@@ -116,6 +116,7 @@ To generate sample images, use
 ```bash
 python sample.py --input=../images/woman.jpg --output=woman.png
 ``` 
+We get really good predictions both for Age and Gender as can be seen in below images
 </br>
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/true.png">
 </br>
