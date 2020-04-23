@@ -82,11 +82,11 @@ nvidia-smi -q -d CLOCK
 We have maintained a [config.yaml](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/configs/config.yaml) file which holds the training configuration. If you are using NVidia GPU, mention the device list under the <b>[GPU][DEVICES]</b> tag. (Note, always provide a list and not a single integer. For single GPU use [0]; for any more GPU for DataParallelism, populate the DEVICE list with more GPU ids). 
 
 We have curated a common script to train both Age and Gender models. To train the model for Gender classification use -
-```python
+```bash
 python main.py --age-gender=gender
 ```
 and to train on age use
-```python
+```bash
 python main.py --age-gender=age
 ```
 
@@ -104,6 +104,19 @@ NOTE: If you don't have GPU, set <b>[GPU][STATUS]</b> flag as False. However, ou
 |-------|------------|--------|----------|-----------|---------|----------|------------|------------|-----------|
 | Age   |  64        |   3    |  60      |  0.976946 |0.702474 | 0.630011 |  0.067266  |  1.616894  |  1.208523 |
 | Gender|  64        |   3    |  60      |  0.999731 |0.934218 | 0.886597 |  0.001065  |  0.367484  |  0.886597 |
+
+Loss and Accuracy curves for both models are present in the [64_output_3](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/tree/master/src/output/64_output_3) directory in the output folder.
+
+Note: More experimentation is required as we yet not conclude the above results are state-of-the art.
+
+## Test &nbsp;
+
+### Static Images
+To generate sample images, use
+```python
+python sample.py --input=../images/woman.jpg --output=woman.png
+``` 
+
  
 ## Developers &nbsp;
 
