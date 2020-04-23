@@ -84,11 +84,11 @@ We have maintained a [config.yaml](https://github.com/nikunjlad/Gender-and-Age-P
 
 We have curated a common script to train both Age and Gender models. To train the model for Gender classification use -
 ```bash
-python main.py --age-gender=gender
+python train.py --age-gender=gender
 ```
 and to train on age use
 ```bash
-python main.py --age-gender=age
+python train.py --age-gender=age
 ```
 
 Model outputs are save in the <b>output</b> folder. For every run of training, output of the run will be saved in a folder named - <BATCH_SIZE>_output_<NUM_GPUS>, where <BATCH_SIZE> is batch size during current run and <NUM_GPUS> is number of GPUs used for training, example [64_output_3](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/tree/master/src/output/64_output_3)
