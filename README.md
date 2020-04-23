@@ -11,22 +11,29 @@
 
 Convolutional Neural Networks are heavily used for image classification tasks. Recently, various techniques were tried for trying to predict age and gender in humans. While it's fairly easy to predict whether a person is a Male or a Female since difference between both is pretty obvious, it becomes difficult to predict an age of a person seeing just their face. <b>Looks can be deceiving</b> as is rightly said and sometimes some people seem to be old but in reality they are not, and likewise, some people seem to be young but they are actually quite old. Various works have been done on this in literature right from using localizing facial features based on their size and ratios to applying constraints for age estimation like aging, etc. However, such constrained techniques do not generalize well on in-the-wild images of human faces. For this project, we have explored the [Adience Dataset](https://talhassner.github.io/home/projects/Adience/Adience-data.html) which represents highly unconstrained and complex in-the-wild human faces. 
 
-The problem of Age and Gender classification was initially solved by [Tal Hassner, et al.](https://scholar.google.com/citations?hl=en&user=ehe5pyIAAAAJ) in their 2015 CVPR paper on [Age and Gender Classification using Convolutional Neural Networks](https://talhassner.github.io/home/projects/cnn_agegender/CVPR2015_CNN_AgeGenderEstimation.pdf). 
+The problem of Age and Gender classification was initially solved by [Tal Hassner, et al.](https://scholar.google.com/citations?hl=en&user=ehe5pyIAAAAJ) in their 2015 CVPR paper on [Age and Gender Classification using Convolutional Neural Networks](https://talhassner.github.io/home/projects/cnn_agegender/CVPR2015_CNN_AgeGenderEstimation.pdf). This project is an implementation of their method along with a few customizations as part of my research work.
 
 ## Dependencies &nbsp;
 ![](https://img.shields.io/badge/python-3.6-yellowgreen) &nbsp; ![](https://img.shields.io/badge/install%20with-pip-orange)
 
 You can either create a virtualenv or a docker container for running the project. We went about creating a virtualenv <br>
-Necessary libraries include but not limited to the following and are installed using pip.
+Necessary libraries include the following and it is </b>recommended</b> to use pip for installation, although conda can also be used.
 
-python==3.6.5 <br>
-numpy=>=1.18.1 <br>
-pandas>=1.0.1 <br>
-nltk>=3.4.5 <br>
-torch>=1.4.0 <br>
-torchvision>=0.5.0 <br>
+torch>=1.5.0
+torchvision>=0.6.0
+opencv-python>=4.2.0.34
+opencv-contrib-python>=4.2.0.34
+numpy>=1.18.3
+Pillow>=7.1.1
+h5py>=2.10.0
+matplotlib>=3.2.1
+tqdm>=4.45.0
 
-For an entire list of libraries for this project refer the [requirements.txt](https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/requirements.txt) file. <br>
+Use the [requirements.txt](https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/requirements.txt) file for installing dependencies in your virtual environment. Once inside your virtualenv run the following command to install packages for this project.
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Project Structure &nbsp; 
 ![](https://img.shields.io/badge/Ubuntu-18.04-blueviolet) 
