@@ -40,16 +40,9 @@ pip install -r requirements.txt
 ![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
 ![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
 
-Developed and configured this project on MAC using PyCharm IDE and trained the model on Google Cloud using NVidia Tesla T4 GPUs <br>
+Dataset consists of ~19,000 aligned images. We used the aligned face images along with 5 helper data fold files - fold_0_data.txt, fold_1_data.txt, fold_2_data.txt, fold_3_data.txt and fold_4_data.txt. Since data was not aggregated into a single package, a small [Process](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/utils/process.py) script was written to read data using <b>OpenCV</b>, covert images from BGR2RGB (more about this in this post by [Satya Mallick](https://www.learnopencv.com/why-does-opencv-use-bgr-color-format/)) and split our datasets into train and test. We used 90% data for training and 10% for testing. We randomly shuffled our data and neatly packaged the training, testing data along with the gender and age labels into a single .h5 file. To download the h5 file, use this link.
 
-#### Birds data directory
-The data lies in the data directory. Download the [bird.zip](https://drive.google.com/file/d/1v0CIe8psyLI0Yle2YylrL91QnEdjdSzP/view?usp=sharing) file and place the extracted bird directory in the data directory in this repository. Following are the files in the bird.zip file.
-
-1. <b>/birds/CUB_200_2011/</b> : It contains an images directory which holds 200 bird class directories. The bird dataset has 200 classes of birds each class has ~60 images of birds.
-2. <b>/birds/CUB_200_2011/bounding_boxes.txt</b> : file which contains bounding box information of the birds in the true images. The annotations are in [top-left-x, top-left-y, width, height] format.
-3. <b>/birds/CUB_200_2011/classes.txt</b> : file containing names of all the 200 classes.
-4. <b>/birds/CUB_200_2011/image_class_labels.txt</b> : file containing class labels. First 60 lines belong to image 1, next 60 lines belong to image 2 and so and so forth.
-5. <b>/birds/CUB_200_2011/images.txt</b> : file containing all the image names in the dataset. this is about ~12000 images, 60 images per class.
+While 2 categories of genders were used throughout the dataset, <b>Male</b> and <b>Female</b>, the ages were chunked into smaller age groups. The Adience dataset had 8 age groups - <b>(0-2), (4, 6), (8, 12), (15, 20), (25, 32), (38, 43), (48, 53), (60, 100)</b>. As we can observe, not all age categories are covered and a lot of data had categories excluding the above mentioned 8. We introduced for more age categories and 
 
 #### DAMSM Models
 
