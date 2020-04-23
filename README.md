@@ -29,7 +29,7 @@ h5py>=2.10.0 </br>
 matplotlib>=3.2.1 </br>
 tqdm>=4.45.0 </br>
 
-Use the [requirements.txt](https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/requirements.txt) file for installing dependencies in your virtual environment. Once inside your virtualenv run the following command to install packages for this project.
+Use the [requirements.txt](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/configs/requirements.txt) file for installing dependencies in your virtual environment. Once inside your virtualenv run the following command to install packages for this project.
 
 ```bash
 pip install -r requirements.txt
@@ -40,9 +40,15 @@ pip install -r requirements.txt
 ![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
 ![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
 
-Dataset consists of ~19,000 aligned images. We used the aligned face images along with 5 helper data fold files - fold_0_data.txt, fold_1_data.txt, fold_2_data.txt, fold_3_data.txt and fold_4_data.txt. Since data was not aggregated into a single package, a small [Process](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/utils/process.py) script was written to read data using <b>OpenCV</b>, covert images from BGR2RGB (more about this in this post by [Satya Mallick](https://www.learnopencv.com/why-does-opencv-use-bgr-color-format/)) and split our datasets into train and test. We used 90% data for training and 10% for testing. We randomly shuffled our data and neatly packaged the training, testing data along with the gender and age labels into a single .h5 file. To download the h5 file, use this link.
+Dataset consists of ~19,000 aligned images. We used the aligned face images along with 5 helper data fold files - <b>fold_0_data.txt</b>, <b>fold_1_data.txt</b>, <b>fold_2_data.txt</b>, <b>fold_3_data.txt</b> and <b>fold_4_data.txt</b>. Since data was not aggregated into a single package, a small [Process](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/utils/process.py) script was written to read data using <b>OpenCV</b>, covert images from BGR2RGB (more about this in this post by [Satya Mallick](https://www.learnopencv.com/why-does-opencv-use-bgr-color-format/)) and split our datasets into train and test. We used 90% data for training and 10% for testing. We randomly shuffled our data and neatly packaged the training, testing data along with the gender and age labels into a single .h5 file. To download the h5 file, use this [link](https://drive.google.com/drive/folders/1gGPHYopXyW9SYRUMI4DpswCuw2ZWFnOk?usp=sharing).
 
-While 2 categories of genders were used throughout the dataset, <b>Male</b> and <b>Female</b>, the ages were chunked into smaller age groups. The Adience dataset had 8 age groups - <b>(0-2), (4, 6), (8, 12), (15, 20), (25, 32), (38, 43), (48, 53), (60, 100)</b>. As we can observe, not all age categories are covered and a lot of data had categories excluding the above mentioned 8. We introduced for more age categories and 
+While 2 categories of genders were used throughout the dataset, <b>Male</b> and <b>Female</b>, the ages were chunked into smaller age groups. The Adience dataset had 8 age groups - <b>(0-2), (4-6), (8-12), (15-20), (25-32), (38-43), (48-53), (60-100)</b>. As we can observe, not all age categories are covered and a lot of data had categories excluding the above mentioned 8. We introduced four more age categories - <b>(21-24), (33-37), (44-47) and (54-59) </b>, since ~1200 images were mislabelled. Our [Process](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/utils/process.py) script takes care of that and reassigns correct labels while removing unwanted samples. We now have 12 classes as compared to the original 4 classes. While the paper published by Tal Hassner performed well with 8 classes, due to imbalanced distribution of classes and lack of samples for the newly added classes, our model has some bias in it. 
+
+(Download the <b>aligned</b> images and place in the adience directory downloaded from above drive link). Command to process script from raw images and export an h5 file : 
+
+```bash
+python process.py --path=data/adience --save=data/adience/adience.h5
+```
 
 #### DAMSM Models
 
