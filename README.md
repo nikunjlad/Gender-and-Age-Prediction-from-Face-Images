@@ -35,10 +35,10 @@ Use the [requirements.txt](https://github.com/nikunjlad/Text-to-Image-Metamorpho
 pip install -r requirements.txt
 ```
 
-## Project Structure &nbsp; 
+## Dataset &nbsp; 
 ![](https://img.shields.io/badge/Ubuntu-18.04-blueviolet) 
-![](https://img.shields.io/badge/Google%20-Cloud-yellow)
-![](https://img.shields.io/badge/NVidia-TeslaT4-red)
+![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
+![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
 
 Developed and configured this project on MAC using PyCharm IDE and trained the model on Google Cloud using NVidia Tesla T4 GPUs <br>
 
