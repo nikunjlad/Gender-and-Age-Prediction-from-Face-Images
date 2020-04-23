@@ -119,8 +119,13 @@ python sample.py --input=../images/woman.jpg --output=woman.png
 We get really good predictions both for Age and Gender as can be seen in below images
 </br>
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/true.png">
-</br>
- 
+</br></br>
+Here is another case of a picture of me and my brother back during our younger days to the times when we were older
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/transition.png">
+</br></br>
+However, its not perfect always. Here is a case where it gave pretty weird results
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/predictions/friends.png">
+
 ## Developers &nbsp;
 
 [![](https://img.shields.io/badge/Nikunj-Lad-yellow)](https://github.com/nikunjlad)
