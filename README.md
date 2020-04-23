@@ -100,11 +100,11 @@ NOTE: If you don't have GPU, set <b>[GPU][STATUS]</b> flag as False. However, ou
 
 ## Observations &nbsp;
 
-| Model | Training | 
-|       | Batches  |
-|-------|----------|
-| Age   |  234     |
-
+| Model | Batch Size | # GPUs | # Epochs | Train Acc | Val Acc | Test Acc | Train Loss | Valid Loss | Test Loss |
+|-------|------------|--------|----------|-----------|---------|----------|------------|------------|-----------|
+| Age   |  64        |   3    |  60      |  0.976946 |0.702474 | 0.630011 |  0.067266  |  1.616894  |  1.208523 |
+| Gender|  64        |   3    |  60      |  0.999731 |0.934218 | 0.886597 |  0.001065  |  0.367484  |  0.886597 |
+ 
 ## Developers &nbsp;
 
 [![](https://img.shields.io/badge/Nikunj-Lad-yellow)](https://github.com/nikunjlad)
