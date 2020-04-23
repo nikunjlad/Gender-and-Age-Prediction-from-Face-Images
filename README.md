@@ -1,6 +1,7 @@
 # Gender-and-Age-Prediction-from-Face-Images &nbsp; ![](https://img.shields.io/badge/release-v1.0-orange)
 
 ![](https://img.shields.io/badge/license-MIT-blue) &nbsp;<br>
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/predictions/multi-person.gif" width="800" height="497">
 
 ## Architecture &nbsp;
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/age_gender.png">
@@ -83,11 +84,11 @@ We have maintained a [config.yaml](https://github.com/nikunjlad/Gender-and-Age-P
 
 We have curated a common script to train both Age and Gender models. To train the model for Gender classification use -
 ```bash
-python main.py --age-gender=gender
+python train.py --age-gender=gender
 ```
 and to train on age use
 ```bash
-python main.py --age-gender=age
+python train.py --age-gender=age
 ```
 
 Model outputs are save in the <b>output</b> folder. For every run of training, output of the run will be saved in a folder named - <BATCH_SIZE>_output_<NUM_GPUS>, where <BATCH_SIZE> is batch size during current run and <NUM_GPUS> is number of GPUs used for training, example [64_output_3](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/tree/master/src/output/64_output_3)
@@ -113,11 +114,23 @@ Note: More experimentation is required as we yet not conclude the above results 
 
 ### Static Images
 To generate sample images, use
-```python
+```bash
 python sample.py --input=../images/woman.jpg --output=woman.png
 ``` 
+We get really good predictions both for Age and Gender as can be seen in below images
+</br>
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/true.png">
+<br><br>
+Here is another case of a picture of me and my brother back during our younger days to the times when we were older
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/transition.png">
+</br></br>
+However, its not perfect always. Here is a case where it gave pretty weird results
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/predictions/friends.png">
 
- 
+## Acknowledges and Credits
+
+This work was heavily inspired from [Adrian Rosebrock](https://www.pyimagesearch.com/2020/04/13/opencv-age-detection-with-deep-learning/)'s and from [Satya Mallick](https://www.learnopencv.com/age-gender-classification-using-opencv-deep-learning-c-python/)s article on Age and Gender Classification on human images. Also thanks for Professor [Dr. Subrata Das](https://www.linkedin.com/in/subrata-das-1293354/) for giving us this awesome project to experiment and reaserch on as part of our coursework.
+
 ## Developers &nbsp;
 
-[![](https://img.shields.io/badge/Nikunj-Lad-yellow)](https://github.com/nikunjlad)
+[Nikunj Lad](https://nikunjlad.dev)
