@@ -35,10 +35,7 @@ Use the [requirements.txt](https://github.com/nikunjlad/Gender-and-Age-Predictio
 pip install -r requirements.txt
 ```
 
-## Dataset &nbsp; 
-![](https://img.shields.io/badge/Ubuntu-18.04-blueviolet) 
-![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
-![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
+## Dataset &nbsp;  
 
 Dataset consists of ~19,000 aligned images. We used the aligned face images along with 5 helper data fold files - <b>fold_0_data.txt</b>, <b>fold_1_data.txt</b>, <b>fold_2_data.txt</b>, <b>fold_3_data.txt</b> and <b>fold_4_data.txt</b>. Since data was not aggregated into a single package, a small [Process](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/utils/process.py) script was written to read data using <b>OpenCV</b>, covert images from BGR2RGB (more about this in this post by [Satya Mallick](https://www.learnopencv.com/why-does-opencv-use-bgr-color-format/)) and split our datasets into train and test. We used 90% data for training and 10% for testing. We randomly shuffled our data and neatly packaged the training, testing data along with the gender and age labels into a single .h5 file. To download the h5 file, use this [link](https://drive.google.com/drive/folders/1gGPHYopXyW9SYRUMI4DpswCuw2ZWFnOk?usp=sharing).
 
@@ -50,39 +47,30 @@ While 2 categories of genders were used throughout the dataset, <b>Male</b> and 
 python process.py --path=data/adience --save=data/adience/adience.h5
 ```
 
-#### DAMSM Models
+## System Specifications &nbsp;
+![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
+![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
 
-Download the pretrained [DAMSM Encoders and Decoders](https://drive.google.com/drive/u/0/folders/1KlhVPPRtczelfKkGDhcjkKtJMssi9DIZ), extract and place the birds directory in the <b>DAMSMencoders</b> directory. This directory contains the RNN Text Encoder and the CNN Image Encoder models.
+## Train &nbsp;
 
+We have maintained a [config.yaml](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/configs/config.yaml) file which holds the training configuration. If you are using NVidia GPU, mention the device list under the <b>[GPU][DEVICES]</b> tag. (Note, always provide a list and not a single integer. For single GPU use [0]; for any more GPU for DataParallelism, populate the DEVICE list with more GPU ids). 
 
-## Attention Maps &nbsp;
-
-Attention maps are generated along the course of training either while using the pretrained models or while training AttnGAN from scratch. These are stored in the <b>/output/birds_DAMSM_<timestamp>/</b> directory. <br>
-  
-<img src="https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/assets/attention_maps0.png">
-
-## Run and Evaluate &nbsp;
-
-Pre-train DAMSM models: 
-  - For bird dataset, download the pretrained model of [AttnGAN](https://drive.google.com/file/d/1UbTP2Y4Bx9jHgLQEUJ-D6qqYIt3jHbGz/view?usp=sharing) and place it in the <b>models</b> directory. Use the following command to use pretrained model to generate images.
-  ```python 
-  python pretrain_DAMSM.py --cfg cfg/DAMSM/bird.yml --gpu 0
-  ```
-- Train AttnGAN models:
-  - For bird dataset, to train the entire AttnGAN from scratch, use the following command. 
-  ```python 
-  python main.py --cfg cfg/bird_attn2.yml --gpu 2
-  ```
-- `*.yml` files are example configuration files for training/evaluation our models.
-
-Run 
+We have curated a common script to train both Age and Gender models. To train the model for Gender classification use -
 ```python
-python main.py --cfg cfg/eval_bird.yml --gpu 1
+python main.py --age-gender=gender
 ```
-to generate examples from captions in files listed in <b>"/data/birds/example_filenames.txt"</b>. Results are saved to <b>/output/samples/</b> directory. 
-- Input your own sentence in <b>"/data/birds/example_captions.txt"</b> if you wannt to generate images from customized sentences. 
+and to train on age use
+```python
+python main.py --age-gender=age
+```
 
-NOTE: Use -1 value for the gpu argunment, if you don't have GPU on your system and want to use CPU. Else, mention the GPU id on which to execute your code. In either case, your system will fall back to CPU if no GPU's are detected.
+Model outputs are save in the <b>output</b> folder. For every run of training, output of the run will be saved in a folder named - <BATCH_SIZE>_output_<NUM_GPUS>, where <BATCH_SIZE> is batch size during current run and <NUM_GPUS> is number of GPUs used for training, example [64_output_3](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/tree/master/src/output/64_output_3)
+
+Every training outputs a [statistics](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/64_output_3/age_stats_64_3.json) file giving runtime parameter dictionary, logs along with accuracy and loss curves and best model. 
+
+For our case we will have 2 statistics file, 1 each for gender and age classification and 2 sets of accuracy and loss curves along with 2 models giving best parameters for corresponding runs.
+
+NOTE: If you don't have GPU, set <b>[GPU][STATUS]</b> flag as False. However, our implementation keeps a default check of GPU and automatically switches to CPU in absence of GPU.
 
 ## Results &nbsp;
 
