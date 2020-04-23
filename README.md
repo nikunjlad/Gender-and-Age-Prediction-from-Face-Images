@@ -51,16 +51,42 @@ python process.py --path=data/adience --save=data/adience/adience.h5
 ![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
 ![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
 
+### Cluster Information
+<b>Cluster</b>: Discovery High-Performance Computing Cluster </br>
+<b>Reservation</b>: CSYE7374_GPU </br>
+<b>Reservation memory</b>: 95 GB </br>
+<b>Time reserved</b>: 10 hrs. </br>
+
+If you have access to Discovery, use following command to access reservation (You are supposed to use your reservation in place of CSYE7374_GPU)
+```bash
+srun -p reservation --reservation=CSYE7374_GPU --gres=gpu:v100-sxm2:4 --pty --mem=95000 --time=10:00:00 /bin/bash
+```
+
+### GPU Information
+<b>Model</b>: Nvidia V100-SXM2 </br>
+<b>GPU count</b>: 0 – 4 </br>
+<b>GPU Memory</b>: 32.4805 GB / GPU </br>
+<b>Clock</b>: 1.290Ghz with max boost of 1.530GHz </br>
+
+Use 
+```bash
+watch -n 0.1 nvidia-smi
+```
+to keep a check on GPU usage during training. For getting GPU specific information use, 
+```bash
+nvidia-smi -q -d CLOCK
+```
+
 ## Train &nbsp;
 
 We have maintained a [config.yaml](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/configs/config.yaml) file which holds the training configuration. If you are using NVidia GPU, mention the device list under the <b>[GPU][DEVICES]</b> tag. (Note, always provide a list and not a single integer. For single GPU use [0]; for any more GPU for DataParallelism, populate the DEVICE list with more GPU ids). 
 
 We have curated a common script to train both Age and Gender models. To train the model for Gender classification use -
-```python
+```bash
 python main.py --age-gender=gender
 ```
 and to train on age use
-```python
+```bash
 python main.py --age-gender=age
 ```
 
@@ -72,22 +98,26 @@ For our case we will have 2 statistics file, 1 each for gender and age classific
 
 NOTE: If you don't have GPU, set <b>[GPU][STATUS]</b> flag as False. However, our implementation keeps a default check of GPU and automatically switches to CPU in absence of GPU.
 
-## Results &nbsp;
+## Observations &nbsp;
 
-Given the following 3 statements to the model, we get some realistic bird images as results.
+| Model | Batch Size | # GPUs | # Epochs | Train Acc | Val Acc | Test Acc | Train Loss | Valid Loss | Test Loss |
+|-------|------------|--------|----------|-----------|---------|----------|------------|------------|-----------|
+| Age   |  64        |   3    |  60      |  0.976946 |0.702474 | 0.630011 |  0.067266  |  1.616894  |  1.208523 |
+| Gender|  64        |   3    |  60      |  0.999731 |0.934218 | 0.886597 |  0.001065  |  0.367484  |  0.886597 |
 
-- A red bird with long beak and black wings having a long tail. <br>
+Loss and Accuracy curves for both models are present in the [64_output_3](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/tree/master/src/output/64_output_3) directory in the output folder.
 
-  <img src="https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/assets/bird1.png" width="600" height="500">
-- this bird has a dark light overall body color, with long neck and short legs. <br>
+Note: More experimentation is required as we yet not conclude the above results are state-of-the art.
 
-  <img src="https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/assets/bird2.png" width="600" height="500">
-- A bird with yellow wings and dark eyes and black beak. <br>
+## Test &nbsp;
 
-  <img src="https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/assets/bird3.png" width="600" height="500">
+### Static Images
+To generate sample images, use
+```python
+python sample.py --input=../images/woman.jpg --output=woman.png
+``` 
 
-We documented our work as a presentation. Feel free to check out the presentation [here](https://github.com/nikunjlad/Text-to-Image-Metamorphosis-using-GANs/blob/master/docs/Text-to-Image-Metamorphosis-using-GANs.pptx).
-
+ 
 ## Developers &nbsp;
 
 [![](https://img.shields.io/badge/Nikunj-Lad-yellow)](https://github.com/nikunjlad)
