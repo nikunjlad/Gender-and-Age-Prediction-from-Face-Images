@@ -126,6 +126,10 @@ class Sample:
                     cv2.putText(frameFace, label, (bbox[0], bbox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255),
                                 2,
                                 cv2.LINE_AA)
+
+                    if self.args.output != "":
+                        filename = "output/predictions/" + str(args.output)
+                        cv2.imwrite(filename, frameFace)
                     cv2.imshow("Age Gender Demo", frameFace)
 
             print("time : {:.3f}".format(time.time() - t))
@@ -177,6 +181,8 @@ class Sample:
 parser = argparse.ArgumentParser(description='Use this script to run age and gender recognition using OpenCV.')
 parser.add_argument('-i', '--input', type=str,
                     help='Path to input image or video file. Skip this argument to capture frames from a camera.')
+parser.add_argument('-o', '--output', type=str, default="",
+                    help='Path to output the prediction in case of single image.')
 
 args = parser.parse_args()
 s = Sample(args)

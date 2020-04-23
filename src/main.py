@@ -315,7 +315,7 @@ class Main(DataGen):
         # 3. configuring target labels, in our case we have 2 classification tasks, gender and age classification
         ages = ["(0, 2)", "(4, 6)", "(8, 12)", "(15, 20)", "(21, 24)", "(25, 32)",
                 "(33, 37)", "(38, 43)", "(44, 47)", "(48, 53)", "(54, 59)", "(60, 100)"]
-        genders = ["m", "f"]
+        genders = ["Male", "Female"]
 
         # 4. loading data
         data_path = os.path.join(self.config["DATA"]["DATA_DIR"], "data", self.config["DATALOADER"]["DATASET_NAME"],
