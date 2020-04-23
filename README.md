@@ -129,7 +129,7 @@ However, its not perfect always. Here is a case where it gave pretty weird resul
 
 ## Acknowledges and Credits
 
-This work was heavily inspired from [Adrian Rosebrock](https://www.pyimagesearch.com/2020/04/13/opencv-age-detection-with-deep-learning/)'s article  and from [Satya Mallick](https://www.learnopencv.com/age-gender-classification-using-opencv-deep-learning-c-python/). Also thanks for Professor [Dr. Subrata Das](https://www.linkedin.com/in/subrata-das-1293354/) for giving us this awesome project to experiment and reaserch on as part of our coursework.
+This work was heavily inspired from [Adrian Rosebrock](https://www.pyimagesearch.com/2020/04/13/opencv-age-detection-with-deep-learning/)'s and from [Satya Mallick](https://www.learnopencv.com/age-gender-classification-using-opencv-deep-learning-c-python/)s article on Age and Gender Classification on human images. Also thanks for Professor [Dr. Subrata Das](https://www.linkedin.com/in/subrata-das-1293354/) for giving us this awesome project to experiment and reaserch on as part of our coursework.
 
 ## Developers &nbsp;
 
