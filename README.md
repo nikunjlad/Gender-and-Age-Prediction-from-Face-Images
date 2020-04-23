@@ -3,7 +3,7 @@
 ![](https://img.shields.io/badge/license-MIT-blue) &nbsp;<br>
 
 ## Architecture &nbsp;
-<img src="https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/assets/framework.png">
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/age_gender.png">
 
 ## Description &nbsp; 
 [![](https://img.shields.io/badge/GitHub-taoxugit-red)](https://github.com/davidstap/AttnGAN) &nbsp;
