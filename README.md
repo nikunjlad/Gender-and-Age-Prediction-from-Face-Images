@@ -51,6 +51,32 @@ python process.py --path=data/adience --save=data/adience/adience.h5
 ![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
 ![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
 
+### Cluster Information
+<b>Cluster</b>: Discovery High-Performance Computing Cluster 
+<b>Reservation</b>: CSYE7374_GPU
+<b>Reservation memory</b>: 95 GB
+<b>Time reserved</b>: 10 hrs.
+
+If you have access to Discovery, use following command to access reservation (You are supposed to use your reservation in place of CSYE7374_GPU)
+```bash
+srun -p reservation --reservation=CSYE7374_GPU --gres=gpu:v100-sxm2:4 --pty --mem=95000 --time=10:00:00 /bin/bash
+```
+
+### GPU Information
+<b>Model</b>: Nvidia V100-SXM2
+<b>GPU count</b>: 0 – 4
+<b>GPU Memory</b>: 32.4805 GB / GPU
+<b>Clock</b>: 1.290Ghz with max boost of 1.530GHz
+
+Use 
+```bash
+watch -n 0.1 nvidia-smi
+```
+to keep a check on GPU usage during training. For getting GPU specific information use, 
+```bash
+nvidia-smi -q -d CLOCK
+```
+
 ## Train &nbsp;
 
 We have maintained a [config.yaml](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/configs/config.yaml) file which holds the training configuration. If you are using NVidia GPU, mention the device list under the <b>[GPU][DEVICES]</b> tag. (Note, always provide a list and not a single integer. For single GPU use [0]; for any more GPU for DataParallelism, populate the DEVICE list with more GPU ids). 
