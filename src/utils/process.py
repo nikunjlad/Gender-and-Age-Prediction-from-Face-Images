@@ -1,4 +1,4 @@
-import h5py, cv2, os, random
+import h5py, cv2, os, random, argparse
 from tqdm import tqdm
 import numpy as np
 
@@ -90,7 +90,7 @@ class Process:
             ages = []
             genders = []
             for i in tqdm(range(len(folder))):  # here using tqdm to monitor progress
-                img_path = data_path + os.path.join("/aligned", folder[i][0])
+                img_path = self.data_path + os.path.join("/aligned", folder[i][0])
                 img = self.imread(img_path, width, height)
                 data.append(img)
                 ages.append(self.ages.index(folder[i][1]))
@@ -177,7 +177,13 @@ class Process:
 
 
 if __name__ == "__main__":
-    data_path = os.path.join(os.getenv("HOME"), "data/adience")
-    filename = os.path.join(data_path, "adience.h5")
-    p = Process(data_path, filename)
+    parser = argparse.ArgumentParser(description='Use this script to process dataset.')
+    parser.add_argument('-p', '--path', type=str, required=True,
+                        default=os.path.join(os.getenv("HOME"), "data/adience"),
+                        help='Path to raw dataset file to be processed.')
+    parser.add_argument('-o', '--save', type=str, required=True,
+                        default=os.path.join(os.getenv("HOME"), "data/adience/adience.h5"),
+                        help='Path to save the .h5 file')
+    args = parser.parse_args()
+    p = Process(args.path, args.save)
     p.helper()
