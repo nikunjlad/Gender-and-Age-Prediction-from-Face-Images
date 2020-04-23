@@ -52,17 +52,6 @@ python process.py --path=data/adience --save=data/adience/adience.h5
 ![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
 ![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
 
-### Cluster Information
-<b>Cluster</b>: Discovery High-Performance Computing Cluster </br>
-<b>Reservation</b>: CSYE7374_GPU </br>
-<b>Reservation memory</b>: 95 GB </br>
-<b>Time reserved</b>: 10 hrs. </br>
-
-If you have access to Discovery, use following command to access reservation (You are supposed to use your reservation in place of CSYE7374_GPU)
-```bash
-srun -p reservation --reservation=CSYE7374_GPU --gres=gpu:v100-sxm2:4 --pty --mem=95000 --time=10:00:00 /bin/bash
-```
-
 ### GPU Information
 <b>Model</b>: Nvidia V100-SXM2 </br>
 <b>GPU count</b>: 0 – 4 </br>
@@ -134,6 +123,15 @@ However, its not perfect always. Here is a case where it gave pretty weird resul
 
 In case there are no predictions, we get something like this
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/noperson.png">
+
+### Real-Time 
+
+If you are interested in running this in real time, use the above commands without any arguments
+```bash
+python sample.py
+```
+
+Using the above command, you will be able to have a real time inference on the input stream from the camera. 
 
 ## Acknowledges and Credits
 
