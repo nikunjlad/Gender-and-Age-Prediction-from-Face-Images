@@ -19,15 +19,15 @@ The problem of Age and Gender classification was initially solved by [Tal Hassne
 You can either create a virtualenv or a docker container for running the project. We went about creating a virtualenv <br>
 Necessary libraries include the following and it is </b>recommended</b> to use pip for installation, although conda can also be used.
 
-torch>=1.5.0
-torchvision>=0.6.0
-opencv-python>=4.2.0.34
-opencv-contrib-python>=4.2.0.34
-numpy>=1.18.3
-Pillow>=7.1.1
-h5py>=2.10.0
-matplotlib>=3.2.1
-tqdm>=4.45.0
+torch>=1.5.0 </br>
+torchvision>=0.6.0 </br>
+opencv-python>=4.2.0.34 </br>
+opencv-contrib-python>=4.2.0.34 </br>
+numpy>=1.18.3 </br>
+Pillow>=7.1.1 </br>
+h5py>=2.10.0 </br>
+matplotlib>=3.2.1 </br>
+tqdm>=4.45.0 </br>
 
 Use the [requirements.txt](https://github.com/nikunjlad/Text-to-Image-Metamorphosis/blob/master/requirements.txt) file for installing dependencies in your virtual environment. Once inside your virtualenv run the following command to install packages for this project.
 
