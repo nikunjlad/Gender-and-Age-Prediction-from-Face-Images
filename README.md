@@ -7,8 +7,7 @@
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/age_gender.png">
 
 ## Description &nbsp; 
-[![](https://img.shields.io/badge/GitHub-taoxugit-red)](https://github.com/davidstap/AttnGAN) &nbsp;
-[![](https://img.shields.io/badge/arXiv-AttnGAN-lightgrey)](https://arxiv.org/abs/1711.10485)
+[![](https://img.shields.io/badge/ieee-AgeGender-lightgrey)](https://ieeexplore.ieee.org/document/7301352)
 
 Convolutional Neural Networks are heavily used for image classification tasks. Recently, various techniques were tried for trying to predict age and gender in humans. While it's fairly easy to predict whether a person is a Male or a Female since difference between both is pretty obvious, it becomes difficult to predict an age of a person seeing just their face. <b>Looks can be deceiving</b> as is rightly said and sometimes some people seem to be old but in reality they are not, and likewise, some people seem to be young but they are actually quite old. Various works have been done on this in literature right from using localizing facial features based on their size and ratios to applying constraints for age estimation like aging, etc. However, such constrained techniques do not generalize well on in-the-wild images of human faces. For this project, we have explored the [Adience Dataset](https://talhassner.github.io/home/projects/Adience/Adience-data.html) which represents highly unconstrained and complex in-the-wild human faces. 
 
