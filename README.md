@@ -131,9 +131,9 @@ If you are interested in running this in real time, use the above commands witho
 python sample.py
 ```
 
-Using the above command, you will be able to have a real time inference on the input stream from the camera. 
+Using the above command, you will be able to have a real time inference on the input stream from the camera. The above real time inference was done using pretrained CaffeModel of age and gender. I am still working on getting the PyTorch models production ready!
 
-## Acknowledges and Credits
+## Acknowledgement and Credits
 
 This work was heavily inspired and derived from [Adrian Rosebrock](https://www.pyimagesearch.com/2020/04/13/opencv-age-detection-with-deep-learning/)'s and from [Satya Mallick](https://www.learnopencv.com/age-gender-classification-using-opencv-deep-learning-c-python/)s article on Age and Gender Classification on human images. Also thanks for Professor [Dr. Subrata Das](https://www.linkedin.com/in/subrata-das-1293354/) for giving us this awesome project to experiment and research on as part of our coursework.
 
