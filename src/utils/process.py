@@ -14,7 +14,7 @@ class Process:
         self.folder_files = ['fold_0_data.txt', 'fold_1_data.txt', 'fold_2_data.txt', 'fold_3_data.txt',
                              'fold_4_data.txt']
 
-        # age category classes, there are 8 age groups
+        # age category classes, there are 12 age groups
         self.ages = ["(0, 2)", "(4, 6)", "(8, 12)", "(15, 20)", "(21, 24)", "(25, 32)",
                      "(33, 37)", "(38, 43)", "(44, 47)", "(48, 53)", "(54, 59)", "(60, 100)"]
 

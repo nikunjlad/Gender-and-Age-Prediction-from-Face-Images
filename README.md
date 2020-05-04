@@ -7,8 +7,7 @@
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/age_gender.png">
 
 ## Description &nbsp; 
-[![](https://img.shields.io/badge/GitHub-taoxugit-red)](https://github.com/davidstap/AttnGAN) &nbsp;
-[![](https://img.shields.io/badge/arXiv-AttnGAN-lightgrey)](https://arxiv.org/abs/1711.10485)
+[![](https://img.shields.io/badge/ieee-AgeGender-lightgrey)](https://ieeexplore.ieee.org/document/7301352)
 
 Convolutional Neural Networks are heavily used for image classification tasks. Recently, various techniques were tried for trying to predict age and gender in humans. While it's fairly easy to predict whether a person is a Male or a Female since difference between both is pretty obvious, it becomes difficult to predict an age of a person seeing just their face. <b>Looks can be deceiving</b> as is rightly said and sometimes some people seem to be old but in reality they are not, and likewise, some people seem to be young but they are actually quite old. Various works have been done on this in literature right from using localizing facial features based on their size and ratios to applying constraints for age estimation like aging, etc. However, such constrained techniques do not generalize well on in-the-wild images of human faces. For this project, we have explored the [Adience Dataset](https://talhassner.github.io/home/projects/Adience/Adience-data.html) which represents highly unconstrained and complex in-the-wild human faces. 
 
@@ -52,17 +51,6 @@ python process.py --path=data/adience --save=data/adience/adience.h5
 ![](https://img.shields.io/badge/Discovery%20-HPC-yellow)
 ![](https://img.shields.io/badge/NVidia-v100:sxm2-red)
 
-### Cluster Information
-<b>Cluster</b>: Discovery High-Performance Computing Cluster </br>
-<b>Reservation</b>: CSYE7374_GPU </br>
-<b>Reservation memory</b>: 95 GB </br>
-<b>Time reserved</b>: 10 hrs. </br>
-
-If you have access to Discovery, use following command to access reservation (You are supposed to use your reservation in place of CSYE7374_GPU)
-```bash
-srun -p reservation --reservation=CSYE7374_GPU --gres=gpu:v100-sxm2:4 --pty --mem=95000 --time=10:00:00 /bin/bash
-```
-
 ### GPU Information
 <b>Model</b>: Nvidia V100-SXM2 </br>
 <b>GPU count</b>: 0 – 4 </br>
@@ -91,13 +79,16 @@ and to train on age use
 python train.py --age-gender=age
 ```
 
+To get pretrained models for transfer learning, download the [age.pt](https://drive.google.com/file/d/1TN1UzN6g87yer_z6VsITwfl0nvmEezZT/view?usp=sharing) and [gender.pt](https://drive.google.com/file/d/1COQv-QLr3L7YHaIYl8OyYRO3Ibvi4jQS/view?usp=sharing) files which were trained for 60 epochs.
+<b>Note</b>: Since, these models were trained by adding 4 new classes, they might have significant bias in them.
+
 Model outputs are save in the <b>output</b> folder. For every run of training, output of the run will be saved in a folder named - <BATCH_SIZE>_output_<NUM_GPUS>, where <BATCH_SIZE> is batch size during current run and <NUM_GPUS> is number of GPUs used for training, example [64_output_3](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/tree/master/src/output/64_output_3)
 
 Every training outputs a [statistics](https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/64_output_3/age_stats_64_3.json) file giving runtime parameter dictionary, logs along with accuracy and loss curves and best model. 
 
 For our case we will have 2 statistics file, 1 each for gender and age classification and 2 sets of accuracy and loss curves along with 2 models giving best parameters for corresponding runs.
 
-NOTE: If you don't have GPU, set <b>[GPU][STATUS]</b> flag as False. However, our implementation keeps a default check of GPU and automatically switches to CPU in absence of GPU.
+<b>NOTE</b>: If you don't have GPU, set <b>[GPU][STATUS]</b> flag as False. However, our implementation keeps a default check of GPU and automatically switches to CPU in absence of GPU.
 
 ## Observations &nbsp;
 
@@ -121,15 +112,29 @@ We get really good predictions both for Age and Gender as can be seen in below i
 </br>
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/true.png">
 <br><br>
+
 Here is another case of a picture of me and my brother back during our younger days to the times when we were older
 <img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/transition.png">
 </br></br>
+
 However, its not perfect always. Here is a case where it gave pretty weird results
-<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/predictions/friends.png">
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/src/output/predictions/friends.png"><br><br>
 
-## Acknowledges and Credits
+In case there are no predictions, we get something like this
+<img src="https://github.com/nikunjlad/Gender-and-Age-Prediction-from-Face-Images/blob/master/assets/noperson.png">
 
-This work was heavily inspired from [Adrian Rosebrock](https://www.pyimagesearch.com/2020/04/13/opencv-age-detection-with-deep-learning/)'s and from [Satya Mallick](https://www.learnopencv.com/age-gender-classification-using-opencv-deep-learning-c-python/)s article on Age and Gender Classification on human images. Also thanks for Professor [Dr. Subrata Das](https://www.linkedin.com/in/subrata-das-1293354/) for giving us this awesome project to experiment and reaserch on as part of our coursework.
+### Real-Time 
+
+If you are interested in running this in real time, use the above commands without any arguments
+```bash
+python sample.py
+```
+
+Using the above command, you will be able to have a real time inference on the input stream from the camera. The above real time inference was done using pretrained CaffeModel of age and gender. I am still working on getting the PyTorch models production ready!
+
+## Acknowledgement and Credits
+
+This work was heavily inspired and derived from [Adrian Rosebrock](https://www.pyimagesearch.com/2020/04/13/opencv-age-detection-with-deep-learning/)'s and from [Satya Mallick](https://www.learnopencv.com/age-gender-classification-using-opencv-deep-learning-c-python/)s article on Age and Gender Classification on human images. Also thanks to Professor [Dr. Subrata Das](https://www.linkedin.com/in/subrata-das-1293354/) for giving us this awesome project, to experiment and research on as part of our coursework.
 
 ## Developers &nbsp;
 
