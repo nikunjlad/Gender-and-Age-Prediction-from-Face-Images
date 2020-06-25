@@ -69,18 +69,15 @@ class DataGen:
         y_valid_gender = self.data["gender"]["y_train"][valid_idx]
 
         # convert data to lists
-        self.data["x_train"] = list(x_train.transpose(0, 3, 1, 2))  # training data
-        self.data["x_valid"] = list(x_valid.transpose(0, 3, 1, 2))  # validation data
-        self.data["x_test"] = list(self.data["x_test"].transpose(0, 3, 1, 2))  # test data
+        self.data["x_train"] = torch.tensor(x_train).permute(0, 3, 1, 2) # training data
+        self.data["x_valid"] = torch.tensor(x_valid).permute(0, 3, 1, 2)  # validation data
+        self.data["x_test"] = torch.tensor(self.data["x_test"]).permute(0, 3, 1, 2)  # test data
         self.data["age"]["y_train"] = torch.tensor(y_train_age, dtype=torch.int64)  # training age labels
-        self.data["age"]["y_valid"] = list(y_valid_age)  # validation age labels
-        self.data["age"]["y_test"] = list(self.data["age"]["y_test"])  # testing age labels
-        self.data["gender"]["y_train"] = list(y_train_gender)  # training gender labels
-        self.data["gender"]["y_valid"] = list(y_valid_gender)  # validation gender labels
-        self.data["gender"]["y_test"] = list(self.data["gender"]["y_test"])  # testing gender labels
-
-        print(type(self.data["age"]["y_train"]))
-        print(self.data["age"]["y_train"][0:10])
+        self.data["age"]["y_valid"] = torch.tensor(y_valid_age, dtype=torch.int64)  # validation age labels
+        self.data["age"]["y_test"] = torch.tensor(self.data["age"]["y_test"], dtype=torch.int64)  # testing age labels
+        self.data["gender"]["y_train"] = torch.tensor(y_train_gender, dtype=torch.int64)  # training gender labels
+        self.data["gender"]["y_valid"] = torch.tensor(y_valid_gender, dtype=torch.int64)  # validation gender labels
+        self.data["gender"]["y_test"] = torch.tensor(self.data["gender"]["y_test"], dtype=torch.int64)  # testing gender labels
 
     def configure_dataloaders(self):
         transform_train = transforms.Compose([
