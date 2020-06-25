@@ -72,7 +72,7 @@ class DataGen:
         self.data["x_train"] = list(x_train.transpose(0, 3, 1, 2))  # training data
         self.data["x_valid"] = list(x_valid.transpose(0, 3, 1, 2))  # validation data
         self.data["x_test"] = list(self.data["x_test"].transpose(0, 3, 1, 2))  # test data
-        self.data["age"]["y_train"] = list(y_train_age)  # training age labels
+        self.data["age"]["y_train"] = torch.tensor(y_train_age, dtype=torch.int64)  # training age labels
         self.data["age"]["y_valid"] = list(y_valid_age)  # validation age labels
         self.data["age"]["y_test"] = list(self.data["age"]["y_test"])  # testing age labels
         self.data["gender"]["y_train"] = list(y_train_gender)  # training gender labels
