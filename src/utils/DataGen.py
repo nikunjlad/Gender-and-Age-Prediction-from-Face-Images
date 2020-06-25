@@ -9,7 +9,7 @@ class Data(Dataset):
 
     def __init__(self, data, targets, transform=None):
         self.data = data
-        self.targets = torch.LongTensor(targets)
+        self.targets = targets
         self.transform = transform
 
     def __getitem__(self, index):
@@ -17,7 +17,7 @@ class Data(Dataset):
         y = self.targets[index]
 
         if self.transform:
-            x = Image.fromarray(self.data[index].astype(np.uint8).transpose(1, 2, 0))
+            x = Image.fromarray(torch.tensor(self.data[index], dtype=torch.uint8).permute(1, 2, 0))
             x = self.transform(x)
 
         return x, y
