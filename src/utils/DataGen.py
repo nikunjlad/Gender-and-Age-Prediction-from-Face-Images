@@ -79,7 +79,8 @@ class DataGen:
         self.data["gender"]["y_valid"] = list(y_valid_gender)  # validation gender labels
         self.data["gender"]["y_test"] = list(self.data["gender"]["y_test"])  # testing gender labels
 
-        print(self.data["age"]["y_train"])
+        print(type(self.data["age"]["y_train"]))
+        print(self.data["age"]["y_train"][0:10])
 
     def configure_dataloaders(self):
         transform_train = transforms.Compose([
