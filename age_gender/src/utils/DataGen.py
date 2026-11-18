@@ -68,6 +68,7 @@ class DataGen:
         y_train_gender = self.data["gender"]["y_train"][train_idx]
         y_valid_gender = self.data["gender"]["y_train"][valid_idx]
 
+
         # convert data to lists
         self.data["x_train"] = torch.tensor(x_train).permute(0, 3, 1, 2) # training data
         self.data["x_valid"] = torch.tensor(x_valid).permute(0, 3, 1, 2)  # validation data

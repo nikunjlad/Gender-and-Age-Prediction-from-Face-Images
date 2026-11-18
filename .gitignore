@@ -1,2 +1,28 @@
 *.DS_Store
 *.idea
+
+# Environment and tool caches
+.venv/
+.ruff_cache/
+.pytest_cache/
+__pycache__/
+
+# Secrets (keep .envrc, it only sets up the environment)
+.env*
+!.envrc
+
+# Datasets and model weights (any folder named data/ or weights/)
+data/
+weights/
+
+# Training runs (checkpoints)
+runs/
+
+# Evaluation: keep metrics.json and PR curves, ignore per-image predictions
+results/**/predictions/
+results/**/vis/
+
+# Exports and inference output
+*.onnx
+*.plan
+detections/

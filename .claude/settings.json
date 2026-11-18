@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.env*)",
+      "Read(./secrets/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(terraform apply*)",
+      "Bash(kubectl delete*)",
+      "Bash(pip install*)",
+      "Bash(pip3 install*)",
+      "Bash(pip uninstall*)",
+      "Bash(python -m pip install*)",
+      "Bash(python3 -m pip install*)",
+      "Edit(face_detection/data/**)",
+      "Edit(face_detection/weights/**)",
+      "Edit(face_detection/results/**)",
+      "Edit(face_detection/runs/**)",
+      "Edit(age_gender/models/**)",
+      "Edit(age_gender/data/**)"
+    ],
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(pytest*)",
+      "Bash(python -m pytest*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": false,
+    "allowUnsandboxedCommands": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guardrail-check.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

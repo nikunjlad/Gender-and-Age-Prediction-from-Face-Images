@@ -71,7 +71,7 @@ class Sample:
         padding = 20  # padding the bounding box by 20 pixels on all sides
 
         # loop while any key press
-        while cv2.waitKey(1) < 0:
+        while cv2.waitKey(0) < 0:
             # Read frame
             t = time.time()  # start time for inference
             hasFrame, frame = cap.read()  # get the image frame from the capture object of the camera

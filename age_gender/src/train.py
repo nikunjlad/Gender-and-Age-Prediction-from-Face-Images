@@ -70,7 +70,7 @@ class Main(DataGen):
     def train(self, net, epochs, optimizer, criterion, scheduler, stats, args, output_path):
 
         history = list()
-        train_start = time.time()  # start_time of training
+        train_start = time.time()     # start_time of training
         best_val_loss = float('inf')  # initially loss in infinite
         model_name = self.args.age_gender + "_model_" + str(self.config["HYPERPARAMETERS"]["BATCH_SIZE"]) + "_" + \
                      str(len(self.config["GPU"]["DEVICES"])) + ".pt"
@@ -108,6 +108,8 @@ class Main(DataGen):
                 train_loss += loss.item() * inputs.size(0)
 
                 ret, predictions = torch.max(outputs.data, 1)  # Compute the accuracy
+
+                # compare predictions
                 correct_counts = predictions.eq(labels.data.view_as(predictions))
 
                 # Convert correct_counts to float and then compute the mean
