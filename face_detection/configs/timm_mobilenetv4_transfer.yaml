@@ -1,0 +1,36 @@
+# Scenario D: any timm backbone (here MobileNetV4-Conv-Medium, edge friendly) + neck/heads
+# transferred from biubug6's MobileNet0.25 RetinaFace (out_channel 64).
+# Swap model.backbone for e.g. timm:convnext_tiny, timm:efficientnet_b0, timm:regnety_016 ...
+# (use out_channel 256 + Resnet50_Final.pth as source for the bigger ones).
+name: mnv4m_from_mnet025
+
+model:
+  backbone: timm:mobilenetv4_conv_medium
+  backbone_pretrained: true
+  out_channel: 64
+  input_norm: auto                  # resolved from the timm model's pretrained config
+
+init:
+  checkpoint: weights/mobilenet0.25_Final.pth
+  exclude: [body., fpn.output]
+  require: [ssh, heads]
+
+data:
+  train_root: data/widerface/train/images
+  train_labels: data/widerface/train/label.txt
+  val_root: data/widerface/val/images
+  val_labels: data/widerface/val/label.txt
+  image_size: 640
+  workers: 8
+
+train:
+  epochs: 120
+  batch_size: 32
+  optimizer: adamw
+  lr: 2.0e-3
+  weight_decay: 0.05
+  warmup_epochs: 3
+  freeze_backbone_epochs: 5
+  backbone_lr_mult: 0.3
+  unfreeze_warmup_epochs: 3
+  ap_every: 5

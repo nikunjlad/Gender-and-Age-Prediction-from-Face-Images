@@ -19,8 +19,8 @@ weights/
 runs/
 
 # Evaluation: keep metrics.json and PR curves, ignore per-image predictions
-results/**/predictions/
-results/**/vis/
+**/results/**/predictions/
+**/results/**/vis/
 
 # Exports and inference output
 *.onnx

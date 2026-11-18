@@ -1,0 +1,36 @@
+# Scenario C: NEW backbone (torchvision ResNet-34, ImageNet weights) + neck/heads transferred from
+# biubug6's ResNet-50 RetinaFace. out_channel stays 256 so fpn.merge*, ssh* and the heads load;
+# the lateral 1x1 convs (fpn.output*) depend on the backbone's widths, so they start fresh.
+name: r34_from_r50
+
+model:
+  backbone: resnet34
+  backbone_pretrained: true         # torchvision ImageNet weights
+  out_channel: 256                  # must match the source checkpoint to reuse the neck/heads
+  input_norm: auto                  # -> imagenet_rgb for torchvision weights
+
+init:
+  checkpoint: weights/Resnet50_Final.pth
+  # body.*: R50 and R34 share stem shapes, but mixing a R50 stem into R34 is wrong -> exclude.
+  # fpn.output*: input widths differ (512/1024/2048 vs 128/256/512) -> fresh.
+  exclude: [body., fpn.output]
+  require: [ssh, heads]
+
+data:
+  train_root: data/widerface/train/images
+  train_labels: data/widerface/train/label.txt
+  val_root: data/widerface/val/images
+  val_labels: data/widerface/val/label.txt
+  image_size: 640
+  workers: 8
+
+train:
+  epochs: 80
+  batch_size: 24
+  lr: 2.0e-3
+  warmup_epochs: 2
+  freeze_backbone_epochs: 5         # stage 1: fit fresh laterals to the transferred SSH/heads
+  backbone_lr_mult: 0.2             # ImageNet features need more adaptation than a face-trained body
+  unfreeze_warmup_epochs: 2
+  freeze_stages: 1                  # keep the stem frozen
+  ap_every: 5

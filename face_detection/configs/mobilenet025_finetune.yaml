@@ -1,0 +1,31 @@
+# Scenario A: same backbone, fine-tune biubug6's MobileNet0.25 RetinaFace on your data.
+# Everything transfers; the short frozen phase lets the heads adapt before backbone features move.
+name: mnet025_finetune
+
+model:
+  backbone: mobilenet0.25
+  backbone_pretrained: false        # weights come from init.checkpoint
+  out_channel: 64
+  input_norm: retinaface_bgr        # what biubug6 checkpoints were trained with
+
+init:
+  checkpoint: weights/mobilenet0.25_Final.pth
+  require: [body, fpn, ssh, heads]  # abort if the checkpoint doesn't fully match
+
+data:
+  train_root: data/custom/train/images
+  train_labels: data/custom/train/label.txt
+  val_root: data/custom/val/images
+  val_labels: data/custom/val/label.txt
+  image_size: 640
+  workers: 8
+
+train:
+  epochs: 60
+  batch_size: 32
+  lr: 1.0e-3
+  warmup_epochs: 1
+  freeze_backbone_epochs: 3
+  backbone_lr_mult: 0.1
+  unfreeze_warmup_epochs: 1
+  ap_every: 5

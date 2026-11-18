@@ -1,0 +1,32 @@
+# Scenario B: same backbone, fine-tune biubug6's ResNet-50 RetinaFace (higher accuracy, heavier).
+name: r50_finetune
+
+model:
+  backbone: resnet50
+  backbone_pretrained: false
+  out_channel: 256
+  input_norm: retinaface_bgr
+
+init:
+  checkpoint: weights/Resnet50_Final.pth
+  require: [body, fpn, ssh, heads]
+
+data:
+  train_root: data/custom/train/images
+  train_labels: data/custom/train/label.txt
+  val_root: data/custom/val/images
+  val_labels: data/custom/val/label.txt
+  image_size: 840
+  workers: 8
+
+train:
+  epochs: 40
+  batch_size: 16
+  lr: 1.0e-3
+  warmup_epochs: 1
+  freeze_backbone_epochs: 3
+  freeze_stages: 2                  # stem + layer1 stay frozen: generic low-level features
+  freeze_backbone_bn: true          # batch 16 is too small to re-estimate ResNet BN stats well
+  backbone_lr_mult: 0.1
+  ap_every: 5
+  ap_max_size: 1280
